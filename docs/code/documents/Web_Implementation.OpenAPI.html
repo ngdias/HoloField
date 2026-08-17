@@ -1,0 +1,78 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>OpenAPI | HoloField - Boundary-to-Volume Generator</title><meta name="description" content="Documentation for HoloField - Boundary-to-Volume Generator"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">HoloField - Boundary-to-Volume Generator</a>
+<div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
+<ul role="listbox" id="tsd-search-results"></ul>
+<div id="tsd-search-status" aria-live="polite" aria-atomic="true">
+<div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-menu"></use></svg></a></div></header>
+<div class="container container-main">
+<div class="col-content">
+<div class="tsd-page-title">
+<ul class="tsd-breadcrumb" aria-label="Breadcrumb">
+<li><a href="Web_Implementation.html">Web Implementation</a></li>
+<li><a href="" aria-current="page">OpenAPI</a></li></ul></div>
+<div class="tsd-panel tsd-typography"><h1 id="api-architecture" class="tsd-anchor-link">API Architecture<a href="#api-architecture" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h1>
+<p>For the moment, the API only exposes endpoints that return a single value: boundary fields and decoders. Functions that return full datasets will require a different arrangement to support binary file downloads and an upload interface for demonstrating dataset import. This will be implemented in a future update.</p>
+<p>While the OpenAPI schema conventionally describes an API for documentation and client generation, this project also uses the schema as operational configuration. It encodes information required by the API implementation, including:</p>
+<ul>
+<li>the HTTP endpoint path;</li>
+<li>the callable implementation associated with each operation;</li>
+<li>the information required to construct precise Swagger documentation URLs.</li>
+</ul>
+<p>This makes the OpenAPI schema the source of truth for endpoint configuration, allowing the API routes to be created procedurally rather than maintaining the same information independently in the application code.</p>
+<p>One major advantage is that disabling an endpoint is simply a matter of commenting 2 lines in the <code>paths:</code> section of the main OpenAPI schema file, <code>openapi.yaml</code>.</p>
+<h2 id="operationid" class="tsd-anchor-link">operationId<a href="#operationid" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>OpenAPI <code>operationId</code> values have an operational role beyond the API implementation. Each value corresponds to the name of the callable implementation associated with the operation: a function in the case of decoders, or an object implementing the field interface in the case of boundary fields.</p>
+<p>For example,</p>
+<pre><code class="yaml"><span class="hl-5">operationId</span><span class="hl-1">: </span><span class="hl-6">radialDecoder</span>
+</code><button type="button">Copy</button></pre>
+
+<p>shares the same identifier name as the corresponding function in the application.</p>
+<p>When adding, removing, or renaming an operation, its <code>operationId</code> must remain synchronized with the corresponding implementation.</p>
+<h2 id="openapi-paths-as-the-endpoint-source-of-truth" class="tsd-anchor-link">OpenAPI paths as the endpoint source of truth<a href="#openapi-paths-as-the-endpoint-source-of-truth" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>The OpenAPI <code>path</code> definitions are also used operationally. <code>CreateAPIEndpoints()</code> is responsible for orchestrating the registry of the API endpoints as Express routes from the validated OpenAPI schema.</p>
+<p>For example, an OpenAPI definition such as:</p>
+<pre><code class="yaml"><span class="hl-5">/decoders/radial</span><span class="hl-1">:</span><br/><span class="hl-1">  </span><span class="hl-5">get</span><span class="hl-1">:</span><br/><span class="hl-1">    </span><span class="hl-5">operationId</span><span class="hl-1">: </span><span class="hl-6">radialDecoder</span>
+</code><button type="button">Copy</button></pre>
+
+<p>provides both the HTTP endpoint path (ex. /decoders/radial) and the operation identifier (radialDecoder) used by the application.</p>
+<pre><code class="text">OpenAPI schema
+     │
+     ├── operationId ──→ callable implementation
+     │
+     └── path ─────────→ registry endpoint
+                              │
+                              ▼
+                    CreateAPIEndpoints()
+                              │
+                              ▼
+                       Express routes
+</code><button type="button">Copy</button></pre>
+
+<p>The implementation therefore does not need to maintain separate hard-coded endpoint paths. Changes to the API's documented paths in the schema propagate directly to the generated routes.</p>
+<h2 id="precise-swagger-paths-for-error-guidance" class="tsd-anchor-link">Precise Swagger paths for error guidance<a href="#precise-swagger-paths-for-error-guidance" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>The same configuration also supports the documentation links included with API errors. Because the Swagger path is derived from the OpenAPI definition, these links can target the specific endpoint section rather than the top of the Swagger homepage, facilitating navigation when the API contains an extensive list of endpoints.</p>
+</div></div>
+<div class="col-sidebar">
+<div class="page-menu">
+<div class="tsd-navigation settings">
+<details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>Settings</h3></summary>
+<div class="tsd-accordion-details">
+<div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span>
+<ul id="tsd-filter-options">
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div>
+<div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div>
+<details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>On This Page</h3></summary>
+<div class="tsd-accordion-details"><a href="#api-architecture"><span>API <wbr/>Architecture</span></a>
+<ul>
+<li><a href="#operationid"><span>operation<wbr/>Id</span></a></li>
+<li><a href="#openapi-paths-as-the-endpoint-source-of-truth"><span>Open<wbr/>API paths as the endpoint source of truth</span></a></li>
+<li><a href="#precise-swagger-paths-for-error-guidance"><span>Precise <wbr/>Swagger paths for error guidance</span></a></li></ul></div></details></div>
+<div class="site-menu">
+<nav class="tsd-navigation"><a href="../index.html">HoloField - Boundary-to-Volume Generator</a>
+<ul class="tsd-small-nested-navigation" id="tsd-nav-container">
+<li>Loading...</li></ul></nav></div></div></div><footer>
+<p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>
+<div class="overlay"></div></body></html>

@@ -1,0 +1,19 @@
+{
+  "entryPoints": [
+    "lib/public/engine"
+  ],
+  "entryPointStrategy": "expand",
+  "projectDocuments": [
+    "docs/concepts/architecture.md",
+    "docs/concepts/web_implementation.md"
+  ],
+  "tsconfig": "tsconfig_build.json",
+  "out": "docs/code",
+  "name": "HoloField - Boundary-to-Volume Generator",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "navigation": {
+    "includeGroups": true,
+    "includeCategories": true,
+  }
+}

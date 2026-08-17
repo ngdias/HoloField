@@ -1,0 +1,13 @@
+name: field
+in: query
+required: true
+description: Boundary field to decode.
+schema:
+  type: string
+  description: Available boundary field implementations.
+  enum:
+    - FruityField
+    - SimpleHeightField
+    - PolarHeightField
+    - HemisphereField
+    - LatitudeBandsField

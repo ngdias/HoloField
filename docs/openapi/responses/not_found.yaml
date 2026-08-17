@@ -1,0 +1,9 @@
+  description: >
+    Bad request.
+    The API defines a global 404 response for requests that do not match a 
+    registered endpoint. Unlike operation-level responses such as 400 and 500, 
+    this response is not associated with an individual OpenAPI operation.
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/api_error.yaml'

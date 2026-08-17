@@ -1,0 +1,353 @@
+* {
+    box-sizing: border-box;
+}
+
+h1 {
+    font-size: clamp(1rem, 3vh, 2.5rem);
+
+    margin: 0;
+    /*margin-top: 0.5rem;*/
+    /*margin-bottom: -0.5rem;*/
+}
+
+h2 {
+    font-size: clamp(0.8rem, 2vh, 1.5rem);
+
+    /*margin: 0;*/
+    /*margin-top: 0.2rem;*/
+}
+
+p {
+    font-size: clamp(0.7rem, 2.5vh, 1rem);
+
+    margin: 0.25rem 0 0 0;
+}
+
+body {
+
+    display: flex;
+    flex-direction: column;
+
+    height: 100vh;
+    margin: 0;
+
+    font-family: system-ui, sans-serif;
+}
+
+header {
+
+    position: relative;
+
+    height: 10vh;
+    /*box-sizing: border-box;*/
+
+    padding: 0.5rem 1rem;
+
+    border-bottom: 1px solid #888;
+}
+
+.document-page {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.document-page h1 {
+    font-size: clamp(0.8rem, 8.3vh, 1.5rem);
+    /*font-size: 2rem;*/
+    margin: 0 0 1rem 0;
+}
+
+.document-page p {
+    font-size: clamp(0.8rem, 7vh, 1.5rem);
+    /*font-size: 1rem;*/
+    margin: 0.5rem 0;
+}
+
+iframe {
+
+    flex: 1;
+
+    width: 100%;
+    height: 100%;
+
+    border: none;
+
+    display: block;
+}
+
+#header-subtitle {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 1rem;
+}
+
+#header-subtitle p {
+
+    margin: 0;
+}
+
+#header-menu {
+
+    display: flex;
+
+    margin-left: 2rem;
+
+    gap: 1.5rem;
+}
+
+#app-layout {
+
+    display: flex;
+
+    height: 90vh;
+
+    /*
+    flex: 1;
+    min-height: 0;
+    */
+}
+
+/* Left pipeline panel */
+
+#pipeline-panel {
+
+    display: flex;
+    flex-direction: column;
+
+    /* never grow, never shrink, always 260 px.*/
+    /*flex: 0 0 260px;*/
+
+    width: 260px;
+    
+    border-right: 2px solid #888;
+
+    padding: 0.1rem 1rem 1rem 1rem;
+    /*padding: 1rem;*/
+    
+    margin: 0;
+    /*margin-top: -0.6rem;*/
+
+    gap: 1rem;
+
+    resize: horizontal;
+    overflow: auto;
+}
+
+#pipeline-panel h2 {
+    
+    margin-bottom: 0;
+}
+
+#pipeline-panel label {
+
+    display: flex;
+    flex-direction: column;
+
+    /* def 0.25*/
+    gap: 0.25rem;
+}
+
+#pipeline-panel small {
+    
+    color: #444;
+    font-size: 0.85rem;
+    
+    /*margin-top: -0.01rem;*/
+
+    min-height: calc(2 * 1.2em);
+    line-height: 1.2em;
+}
+
+#render-button {
+
+    align-self: center;
+    
+    margin-top: 0.75rem;
+
+    padding: 0.4rem 0.8rem;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+#dataset-metadata {
+    margin-top: 1rem;
+    padding: 0.5rem;
+
+    font-size: 0.8rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f8f8f8;
+}
+
+/* Right workspace */
+
+#workspace {
+
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+    min-height: 0;
+}
+
+#docs-workspace iframe {
+
+    flex: 1;
+
+    width: 100%;
+
+    border: none;
+
+    min-height: 0;
+}
+
+.page {
+
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    min-height: 0;
+}
+
+.hidden {
+
+    display: none;
+}
+
+/*
+.workspace-page {
+
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    min-height: 0;
+}
+
+.workspace-hidden {
+
+    display: none;
+}
+*/
+
+/*
+#render-workspace {
+
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    min-height: 0;
+}
+*/
+
+/* Top render list */
+
+#render-list-panel {
+
+    display: flex;
+    flex-direction: column;
+
+    height: 26vh;
+
+    padding: 0.1rem 1rem 1rem;
+
+    border-bottom: 2px solid #888;
+}
+
+/*
+#render-list-page {
+
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    min-height: 0;
+}
+*/
+
+#render-list-layout {
+
+    flex: 1;
+
+    display: flex;
+
+    gap: 1rem;
+
+    min-height: 0;
+}
+
+.render-list {
+
+    min-width: 200px;
+
+    width: var(--frame-width);
+    /*width: var(--viewer-size);*/
+    /*width: 600px;*/
+}
+
+/* Three.js area */
+
+#view-panel {
+
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    min-height: 0;
+
+    padding: 0.8rem;
+}
+
+#viewer-layout {
+
+    flex: 1;
+
+    display: flex;
+
+    gap: 1rem;
+
+    min-height: 0;
+}
+
+.viewer-frame {
+
+    display: flex;
+    flex-direction: column;
+
+    margin: 0;
+    padding: 0.5rem;
+
+    min-height: 0;
+}
+
+.viewer-frame > legend {
+
+    margin-left: auto;
+}
+
+.viewer-frame > div {
+
+    flex: 1;
+
+    min-height: 0;
+
+    aspect-ratio: 1;
+}

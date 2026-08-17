@@ -1,0 +1,36 @@
+get:
+  operationId: SimpleHeightField
+  tags:
+    - Boundary Fields
+  summary: Evaluate the Simple Height field
+  description: >
+    Returns a sinusoidal test pattern based on the X and Y coordinates, with
+    values centered around 0.65 and varying by ±0.1. This field is intended for
+    testing and debugging the projection pipeline.
+
+  parameters:
+    - $ref: '../openapi.yaml#/components/parameters/XCoordinate'
+    - $ref: '../openapi.yaml#/components/parameters/YCoordinate'
+    - $ref: '../openapi.yaml#/components/parameters/ZCoordinate'
+
+  responses:
+    "200":
+      description: Value returned by the field
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - value
+            properties:
+              value:
+                type: number
+                minimum: 0.55
+                maximum: 0.75
+                description: Value returned by the field.
+
+    "400":
+      $ref: '../openapi.yaml#/components/responses/BadRequest'
+
+    "500":
+      $ref: '../openapi.yaml#/components/responses/InternalServerError'

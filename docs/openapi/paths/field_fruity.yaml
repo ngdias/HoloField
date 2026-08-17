@@ -1,0 +1,33 @@
+get:
+  operationId: FruityField
+  tags:
+    - Boundary Fields
+  summary: Evaluate the Fruity test field
+  description: >
+    Evaluates the Fruity field at the supplied coordinates. 
+    This endpoint is intended for testing and debugging a field implementation.
+
+  parameters:
+    - $ref: '../openapi.yaml#/components/parameters/XCoordinate'
+    - $ref: '../openapi.yaml#/components/parameters/YCoordinate'
+    - $ref: '../openapi.yaml#/components/parameters/ZCoordinate'
+
+  responses:
+    "200":
+      description: Value returned by the field
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - value
+            properties:
+              value:
+                type: number
+                description: Value returned by the field.
+
+    "400":
+      $ref: '../openapi.yaml#/components/responses/BadRequest'
+
+    "500":
+      $ref: '../openapi.yaml#/components/responses/InternalServerError'

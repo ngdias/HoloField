@@ -1,0 +1,183 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>Decoders | HoloField - Boundary-to-Volume Generator</title><meta name="description" content="Documentation for HoloField - Boundary-to-Volume Generator"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">HoloField - Boundary-to-Volume Generator</a>
+<div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
+<ul role="listbox" id="tsd-search-results"></ul>
+<div id="tsd-search-status" aria-live="polite" aria-atomic="true">
+<div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-menu"></use></svg></a></div></header>
+<div class="container container-main">
+<div class="col-content">
+<div class="tsd-page-title">
+<ul class="tsd-breadcrumb" aria-label="Breadcrumb">
+<li><a href="Engine_Guide.html">Engine Guide</a></li>
+<li><a href="" aria-current="page">Decoders</a></li></ul></div>
+<div class="tsd-panel tsd-typography"><h1 id="decoders" class="tsd-anchor-link">Decoders<a href="#decoders" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h1>
+<p>A decoder interprets a boundary field as a three-dimensional scalar field.</p>
+<p>The boundary field provides the mathematical description of the source geometry, while the decoder determines how that description is extended or transformed into three-dimensional space. The decoder therefore defines the spatial relationship between the boundary representation and the resulting volumetric field.</p>
+<p>A decoder can be thought of as a mathematical lens: it determines how information defined on the boundary is interpreted throughout the surrounding volume. Different decoders can therefore use the same boundary field to produce different volumetric representations.</p>
+<p>The decoder is also responsible for interpreting the coordinate space supplied by the sampler. The sampler determines where the field is evaluated; the decoder determines how those positions relate to the boundary representation.</p>
+<p>The returned scalar field follows an implicit surface convention:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Scalar value</th>
+<th style="text-align:left">Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">&gt; 0</td>
+<td style="text-align:left">Inside the generated surface</td>
+</tr>
+<tr>
+<td style="text-align:center">= 0</td>
+<td style="text-align:left">On the generated surface</td>
+</tr>
+<tr>
+<td style="text-align:center">&lt; 0</td>
+<td style="text-align:left">Outside the generated surface</td>
+</tr>
+</tbody>
+</table>
+<h2 id="decoder-compatibility" class="tsd-anchor-link">Decoder compatibility<a href="#decoder-compatibility" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>A decoder's geometric assumptions must be compatible with the boundary field being supplied to it.</p>
+<p>For example, the Radial Decoder interprets the boundary as a function of direction from a common origin and therefore expects the boundary field to provide meaningful values for spherical directions. A boundary field designed around a different spatial interpretation may still be passed to the decoder, but the resulting scalar field may not produce a meaningful or useful volume.</p>
+<p>This compatibility is intentionally not enforced by the pipeline. The ability to combine different fields and decoders is part of HoloField's experimental nature, and unusual combinations can be useful for exploring the behaviour of the system.</p>
+<h2 id="radial-decoder" class="tsd-anchor-link">Radial Decoder<a href="#radial-decoder" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>See <a href="../functions/Decoders.RadialDecoder.html" class="tsd-kind-function">Radial Decoder</a> for the implementation.</p>
+<p>The Radial Decoder interprets the boundary field as a directional description of a surface surrounding a common origin.</p>
+<p>For each position in three-dimensional space, the decoder separates the position into its distance from the origin and its normalized direction. The direction is used to query the boundary field, while the returned value determines the radius of the generated surface in that direction.</p>
+<h3 id="mathematical-model" class="tsd-anchor-link">Mathematical model<a href="#mathematical-model" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>For a position <em>p</em>:</p>
+<blockquote>
+<p>r = |p|</p>
+</blockquote>
+<blockquote>
+<p>d = p / |p|</p>
+</blockquote>
+<p>The boundary field is sampled using the unit direction:</p>
+<blockquote>
+<p>boundaryValue = boundary(d)</p>
+</blockquote>
+<p>The boundary value is then mapped to a surface radius:</p>
+<blockquote>
+<p>boundaryRadius = f(boundaryValue)</p>
+</blockquote>
+<p>The scalar field returned by the decoder is:</p>
+<blockquote>
+<p>density = boundaryRadius - r</p>
+</blockquote>
+<p>The zero isosurface represents the surface whose radius varies according to the boundary field.</p>
+<h3 id="geometric-interpretation" class="tsd-anchor-link">Geometric interpretation<a href="#geometric-interpretation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>The decoder effectively treats the boundary as a collection of radial measurements. Each direction from the origin has an associated boundary value, which is interpreted as the distance at which the generated surface occurs along that direction.</p>
+<p>This makes the decoder particularly suitable for spherical and radial projections. The resulting volume is not a direct copy of the boundary surface; it is a volumetric field constructed by extending the boundary information along radial directions.</p>
+<h3 id="tuning-mapboundaryvalue" class="tsd-anchor-link">Tuning mapBoundaryValue()<a href="#tuning-mapboundaryvalue" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>This function has become an experimental part of the Radial Decoder. It defines how values produced by the boundary field are interpreted as geometric radii.</p>
+<p>The function is intentionally structured as a small testbed: several alternative mappings are present in the implementation and can be activated simply by changing the returned expression. Parameter controls may be exposed in the webpage in the future, but this particular tuning will remain code-side only. This allows for some room to experiment with different relationships between the boundary values and the resulting 3D projection without changing the core radial decoding algorithm.</p>
+<p>The choice of mapping can have varying degrees of impact on the resulting geometry, depending on the specific boundary field being sampled. In particular, the relationship between boundary values and radius determines how strongly variations in the boundary field are expressed spatially.</p>
+<p>For example, suppose the boundary field is a gradient:</p>
+<pre><code class="text">z = -1 → value 0
+z =  0 → value 0.5
+z = +1 → value 1
+</code><button type="button">Copy</button></pre>
+
+<p>With direct radius mapping:</p>
+<p><code>radius = value</code></p>
+<p>the resulting radii are:</p>
+<pre><code class="text">bottom: radius 0
+middle: radius 0.5
+top:    radius 1
+</code><button type="button">Copy</button></pre>
+
+<p>A value of zero therefore collapses the projected surface to the origin.</p>
+<p>An alternative mapping of:</p>
+<p><code>radius = 0.5 + value * 0.5</code></p>
+<p>would produce:</p>
+<pre><code class="text">bottom: radius 0.5
+middle: radius 0.75
+top:    radius 1
+</code><button type="button">Copy</button></pre>
+
+<p>The minimum radius is now 0.5, so the same boundary gradient produces a more
+compact range of radii without allowing the surface to collapse to the origin.</p>
+<p>The difference can be understood as a change in dynamic range:</p>
+<pre><code class="text">Direct mapping:
+
+0 -------------------- 1
+point                 sphere
+</code><button type="button">Copy</button></pre>
+
+<pre><code class="text">Offset mapping:
+
+0.5 ------------------ 1
+rounded cap           sphere
+</code><button type="button">Copy</button></pre>
+
+<p>This distinction is important when experimenting with the mapping function.
+Changing the radius range, offset, amplitude, or applying a nonlinear transformation can alter both the overall form and the relative expression of features in the boundary field.</p>
+<p>The volume enclosed by a spherical radius also grows cubically:</p>
+<p>$$
+V = \frac{4}{3}\pi r^3
+$$</p>
+<p>Consequently, equal changes in radius do not correspond to equal changes in enclosed volume. Changes at larger radii affect a substantially larger volume than equivalent changes at shorter radii, but may be visually less noticeable than changes near the center (ie., at shorter radii).</p>
+<p>The current implementation uses direct mapping:</p>
+<p><code>radius = value</code></p>
+<p>while other expressions in <code>mapBoundaryValue()</code> are retained as experimental
+alternatives. They are intended to make the relationship between the mathematical
+boundary description and the resulting spatial projection easy to explore.</p>
+<p>The radial decoder itself only requires a radius to be determined for each sampled
+direction. The particular mathematical relationship used to obtain that radius
+is therefore an experimental choice rather than an intrinsic part of the radial
+projection algorithm.</p>
+<h2 id="height-field-decoder" class="tsd-anchor-link">Height Field Decoder<a href="#height-field-decoder" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>See <a href="../functions/Decoders.HeightFieldDecoder.html" class="tsd-kind-function">Height Field Decoder</a> for the implementation.</p>
+<p>The Height Field Decoder interprets the boundary field as a height function over the XY plane.</p>
+<p>For each position, the decoder samples the boundary field to obtain the height of the surface at that position. The difference between the sampled height and the position's Z coordinate defines the scalar field.</p>
+<p>The purpose of this decoder is to produce a simple terrain-like surface on the XY plane, providing a predictable geometry against which the decoder and subsequent pipeline stages can be tested and verified.</p>
+<h3 id="mathematical-model-1" class="tsd-anchor-link">Mathematical model<a href="#mathematical-model-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>For a position p = (x,y,z):</p>
+<p>h = boundary(x,y,z)</p>
+<p>The decoder returns:</p>
+<p>density = z - h</p>
+<p>The zero isosurface corresponds to the height function defined by the boundary field.</p>
+<h3 id="geometric-interpretation-1" class="tsd-anchor-link">Geometric interpretation<a href="#geometric-interpretation-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>Unlike the Radial Decoder, which extends boundary information outward from a common origin, the Height Field Decoder extends the boundary vertically along the Z axis.</p>
+<p>The same boundary field can therefore produce substantially different geometry depending on which decoder interprets it.</p>
+<h3 id="compatibility" class="tsd-anchor-link">Compatibility<a href="#compatibility" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>The Height Field Decoder expects the boundary field to produce values that can be meaningfully interpreted as height relative to a surface.</p>
+<p>Boundary fields that produce values outside the expected range, or fields whose spatial pattern does not correspond meaningfully to height sampling, may produce unexpected geometries or scalar fields with few or no positive values.</p>
+<p>This is not necessarily an error in the decoder: it may indicate that the mathematical field and the chosen projection model are incompatible.</p>
+</div></div>
+<div class="col-sidebar">
+<div class="page-menu">
+<div class="tsd-navigation settings">
+<details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>Settings</h3></summary>
+<div class="tsd-accordion-details">
+<div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span>
+<ul id="tsd-filter-options">
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div>
+<div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div>
+<details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>On This Page</h3></summary>
+<div class="tsd-accordion-details"><a href="#decoders"><span>Decoders</span></a>
+<ul>
+<li><a href="#decoder-compatibility"><span>Decoder compatibility</span></a></li>
+<li><a href="#radial-decoder"><span>Radial <wbr/>Decoder</span></a></li>
+<li>
+<ul>
+<li><a href="#mathematical-model"><span>Mathematical model</span></a></li>
+<li><a href="#geometric-interpretation"><span>Geometric interpretation</span></a></li>
+<li><a href="#tuning-mapboundaryvalue"><span>Tuning map<wbr/>Boundary<wbr/>Value()</span></a></li></ul></li>
+<li><a href="#height-field-decoder"><span>Height <wbr/>Field <wbr/>Decoder</span></a></li>
+<li>
+<ul>
+<li><a href="#mathematical-model-1"><span>Mathematical model</span></a></li>
+<li><a href="#geometric-interpretation-1"><span>Geometric interpretation</span></a></li>
+<li><a href="#compatibility"><span>Compatibility</span></a></li></ul></li></ul></div></details></div>
+<div class="site-menu">
+<nav class="tsd-navigation"><a href="../index.html">HoloField - Boundary-to-Volume Generator</a>
+<ul class="tsd-small-nested-navigation" id="tsd-nav-container">
+<li>Loading...</li></ul></nav></div></div></div><footer>
+<p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>
+<div class="overlay"></div></body></html>

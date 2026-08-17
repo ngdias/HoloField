@@ -1,0 +1,209 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>Samplers | HoloField - Boundary-to-Volume Generator</title><meta name="description" content="Documentation for HoloField - Boundary-to-Volume Generator"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">HoloField - Boundary-to-Volume Generator</a>
+<div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
+<ul role="listbox" id="tsd-search-results"></ul>
+<div id="tsd-search-status" aria-live="polite" aria-atomic="true">
+<div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-menu"></use></svg></a></div></header>
+<div class="container container-main">
+<div class="col-content">
+<div class="tsd-page-title">
+<ul class="tsd-breadcrumb" aria-label="Breadcrumb">
+<li><a href="../modules/Samplers.html">Samplers</a></li>
+<li><a href="../variables/Samplers.LatLongSampler.html">LatLongSampler</a></li>
+<li><a href="" aria-current="page">Samplers</a></li></ul></div>
+<div class="tsd-panel tsd-typography"><h1 id="samplers" class="tsd-anchor-link">Samplers<a href="#samplers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h1>
+<p>Samplers define where in 3D space a decoded field is evaluated, how densely it is sampled, and how the resulting samples are organized into a dataset.</p>
+<p>The sampler is responsible only for choosing sample positions. It does not modify the field, calculate decoders transformations, or determine how samples are rendered. Different sampling strategies can therefore represent the same field while exposing different properties of the underlying function.</p>
+<p>All samplers produce a standardized dataset, allowing downstream pipeline stages to operate independently of the sampling strategy.</p>
+<p>There are as of now a few different types of samplers:</p>
+<ul>
+<li>boundary samplers</li>
+<li>volume samplers
+<ul>
+<li>point cloud</li>
+<li>voxel samplers</li>
+<li>mesh samplers</li>
+</ul>
+</li>
+</ul>
+<p><strong>Boundary samplers</strong> evaluate the original boundary field directly. They select positions on the surface where the field function is sampled. Different strategies choose these positions differently, affecting the distribution and density of samples while leaving the underlying field unchanged.</p>
+<p><strong>Volume samplers</strong> include point cloud, voxel and mesh. They operate on the three-dimensional scalar field produced by a decoder. Unlike boundary samplers, volume samplers evaluate the field after it has been transformed into a volumetric representation by a decoder function.</p>
+<p>A volume sampler does not modify the 3D representation. Its role is simply to choose where within the volume the decoded field should be evaluated and how those samples are stored.</p>
+<h2 id="latitude-longitude-boundary-sampler" class="tsd-anchor-link">Latitude-Longitude (Boundary Sampler)<a href="#latitude-longitude-boundary-sampler" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>See <a href="../variables/Samplers.LatLongSampler.html" class="tsd-kind-variable">Latitude-Longitude Sampler</a> for the implementation.</p>
+<p>Strictly speaking the implementation uses colatitude + azimuth, not geographical latitude + longitude. The name was chosen for being more intuitive.</p>
+<p>The Latitude-Longitude sampler divides the sphere into a regular angular grid. It is simple, deterministic, and useful when a predictable relationship between sample indices and spherical coordinates is important.</p>
+<p>The main advantage of this approach is simplicity: every point can be described directly by its latitude and longitude coordinates. However, the distribution is not uniform. Points become increasingly concentrated near the poles because lines of longitude converge.</p>
+<h3 id="mathematical-model" class="tsd-anchor-link">Mathematical model<a href="#mathematical-model" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>The sphere is sampled using two angles:</p>
+<ul>
+<li><strong>θ (theta)</strong>: polar angle measured from the positive Z axis.</li>
+<li><strong>φ (phi)</strong>: azimuth angle around the Z axis in the XY plane.</li>
+</ul>
+<p>The generated directions are converted into Cartesian coordinates and used as positions where the boundary field is evaluated.</p>
+<h2 id="fibonacci-boundary-sampler" class="tsd-anchor-link">Fibonacci (Boundary Sampler)<a href="#fibonacci-boundary-sampler" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>See <a href="../variables/Samplers.FibonacciSampler.html" class="tsd-kind-variable">Fibonacci Sampler</a> for the implementation.</p>
+<p>The Fibonacci sampler generates points distributed approximately uniformly over the sphere using the golden angle. Unlike the Latitude-Longitude approach, it does not create a regular grid, but instead attempts to minimise clustering and spacing variations between neighbouring samples.</p>
+<p>This makes it useful when the goal is to represent the overall structure of a field with a fixed number of samples rather than preserve a direct angular indexing scheme.</p>
+<h3 id="mathematical-model-1" class="tsd-anchor-link">Mathematical model<a href="#mathematical-model-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>The algorithm progressively distributes points along the polar axis while rotating each new point by the golden angle:</p>
+<p>$$
+\phi_i = i \times \pi(3-\sqrt{5})
+$$</p>
+<p>The Z coordinate determines the height of each point:</p>
+<p>$$
+z_i = 1 - 2\frac{i+0.5}{N}
+$$</p>
+<p>The remaining X and Y coordinates are calculated from the circular cross-section at that height:</p>
+<pre><code><span class="hl-2">radius</span><span class="hl-1"> = </span><span class="hl-3">sqrt</span><span class="hl-1">(</span><span class="hl-4">1</span><span class="hl-1"> - </span><span class="hl-2">z</span><span class="hl-1">*</span><span class="hl-2">z</span><span class="hl-1">)</span><br/><br/><span class="hl-2">x</span><span class="hl-1"> = </span><span class="hl-3">cos</span><span class="hl-1">(</span><span class="hl-2">phi</span><span class="hl-1">) * </span><span class="hl-2">radius</span><br/><span class="hl-2">y</span><span class="hl-1"> = </span><span class="hl-3">sin</span><span class="hl-1">(</span><span class="hl-2">phi</span><span class="hl-1">) * </span><span class="hl-2">radius</span><br/>
+</code><button>Copy</button></pre>
+
+<p>The resulting vector is a point on the unit sphere.</p>
+<h2 id="uniform-voxel-sampler" class="tsd-anchor-link">Uniform Voxel Sampler<a href="#uniform-voxel-sampler" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>See <a href="../variables/Samplers.UniformVoxelSampler.html" class="tsd-kind-variable">Uniform Voxel Sampler</a> for the implementation.</p>
+<p>The Uniform Voxel Sampler samples the decoded scalar field on a regular Cartesian grid. The sampling volume is divided into equally sized cubic voxels, and the field is evaluated once at the centre of each voxel.</p>
+<p>The primary advantage of this approach is its simplicity. The relationship between voxel indices and spatial positions is straightforward, memory requirements are predictable, and the resulting grid is compatible with many visualization and processing algorithms.</p>
+<p>The trade-off is that every region of the volume receives the same sampling density, regardless of how much the field varies. Future implementations may use adaptive or sparse sampling strategies to concentrate samples where additional detail is beneficial.</p>
+<p>With the current visualization settings, the voxel representation visually obscures the interior of the volume, whereas the point representation can expose interior samples directly, at adequate resolution values. This difference is a consequence of the rendering approach rather than an inherent property of the underlying dataset.</p>
+<h3 id="mathematical-model-2" class="tsd-anchor-link">Mathematical model<a href="#mathematical-model-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>The sampled volume is represented as a regular Cartesian grid with a fixed number of voxels along each axis.</p>
+<p>For a cubic volume of side length <code>size</code> and resolution <code>N</code>, the distance between voxel centres is:</p>
+<blockquote>
+<p>step = size / N</p>
+</blockquote>
+<p>The centre position of a voxel at grid coordinates <code>(x, y, z)</code> is:</p>
+<pre><code><span class="hl-2">position</span><span class="hl-1">.</span><span class="hl-2">x</span><span class="hl-1"> = -</span><span class="hl-2">size</span><span class="hl-1">/</span><span class="hl-4">2</span><span class="hl-1"> + (</span><span class="hl-2">x</span><span class="hl-1"> + </span><span class="hl-4">0.5</span><span class="hl-1">) * </span><span class="hl-2">step</span><br/><span class="hl-2">position</span><span class="hl-1">.</span><span class="hl-2">y</span><span class="hl-1"> = -</span><span class="hl-2">size</span><span class="hl-1">/</span><span class="hl-4">2</span><span class="hl-1"> + (</span><span class="hl-2">y</span><span class="hl-1"> + </span><span class="hl-4">0.5</span><span class="hl-1">) * </span><span class="hl-2">step</span><br/><span class="hl-2">position</span><span class="hl-1">.</span><span class="hl-2">z</span><span class="hl-1"> = -</span><span class="hl-2">size</span><span class="hl-1">/</span><span class="hl-4">2</span><span class="hl-1"> + (</span><span class="hl-2">z</span><span class="hl-1"> + </span><span class="hl-4">0.5</span><span class="hl-1">) * </span><span class="hl-2">step</span>
+</code><button>Copy</button></pre>
+
+<p>The scalar value stored in each voxel is obtained by evaluating the decoded field at the calculated position:</p>
+<p><code>value = decoder.sample(position)</code></p>
+<p>The resulting collection of values forms a discrete approximation of the original continuous scalar field.</p>
+<h2 id="uniform-point-cloud-sampler" class="tsd-anchor-link">Uniform Point Cloud Sampler<a href="#uniform-point-cloud-sampler" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>See <a href="../variables/Samplers.UniformPointCloudSampler.html" class="tsd-kind-variable">Uniform Point Cloud Sampler</a> for the implementation.</p>
+<p>The Uniform Point Cloud Sampler evaluates the decoded scalar field on the same regular Cartesian grid used by the Uniform Voxel Sampler, but stores only the sampled positions that satisfy a value threshold.</p>
+<p>Its primary purpose is to provide another alternative to inspect the spatial distribution of a decoded volume without creating a mesh. By retaining points that satisfy an occupancy condition, the sampler provides a direct visual representation of where the decoded field indicates the presence of the generated volume.</p>
+<p>Unlike a voxel dataset, which retains a value at every position in the regular sampling grid, a point dataset retains only the positions that satisfy its selection criterion. The absence of a point therefore indicates that the sample was not selected, but does not itself preserve the scalar value at that position.</p>
+<p>A further practical difference appears during visualization. The voxel representation retains the complete sampled volume, but its rendered surface can visually obscure the interior of the volume. A point representation does not have the same continuous enclosing appearance: individual samples remain visible according to their spatial distribution. At sufficiently high sampling resolution, this can make internal structures and variations within the generated volume visible through gaps between the outer samples.</p>
+<h3 id="mathematical-model-3" class="tsd-anchor-link">Mathematical model<a href="#mathematical-model-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>For a cubic sampling volume of side length <code>size</code> and resolution <code>N</code>, the distance between sampling positions is:</p>
+<blockquote>
+<p>step = size / N</p>
+</blockquote>
+<p>The position of each sample at grid coordinates <code>(x, y, z)</code> is:</p>
+<pre><code class="text">position.x = -size/2 + (x + 0.5) * step
+position.y = -size/2 + (y + 0.5) * step
+position.z = -size/2 + (z + 0.5) * step
+</code><button type="button">Copy</button></pre>
+
+<p>The decoded field is evaluated at each position:</p>
+<p><code>value = decoder.sample(position)</code></p>
+<p>A sample is added to the point dataset when:</p>
+<p><code>value &gt;= threshold</code></p>
+<p>The resulting dataset therefore contains a subset of the uniformly distributed sampling positions together with their corresponding scalar values.</p>
+<hr>
+<h2 id="surface-point-cloud-sampler" class="tsd-anchor-link">Surface Point Cloud Sampler<a href="#surface-point-cloud-sampler" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>See <a href="../variables/Samplers.SurfacePointCloudSampler.html" class="tsd-kind-variable">Surface Point Cloud Sampler</a> for the implementation.</p>
+<p>The Surface Point Cloud Sampler evaluates the decoded scalar field on a regular Cartesian grid and retains samples whose values are close to a specified isosurface.</p>
+<p>Unlike the Uniform Point Cloud Sampler, which selects points according to whether their values exceed a threshold, the Surface Point Cloud Sampler is intended to produce a point representation of the <strong>surface itself</strong>.</p>
+<p>This makes it useful for inspecting the location and distribution of an implicit surface before applying a mesh extraction algorithm. It can also provide a lightweight representation of the surface for visualization and diagnostic purposes.</p>
+<p>The trade-off is that the resulting point density depends on both the sampling resolution and the selected tolerance around the isovalue. A tolerance that is too small may produce too few points, while a large tolerance may produce a thick band of points around the surface rather than a thin surface representation.</p>
+<h3 id="mathematical-model-4" class="tsd-anchor-link">Mathematical model<a href="#mathematical-model-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>For each sampling position <code>(x, y, z)</code>, the decoded field is evaluated:</p>
+<p><code>value = decoder.sample(position)</code></p>
+<p>A sample is retained when its scalar value lies within the specified threshold of the target isovalue:</p>
+<p><code>|value - isoValue| &lt;= threshold</code></p>
+<p>The resulting dataset therefore approximates the isosurface:</p>
+<blockquote>
+<p>value = isoValue</p>
+</blockquote>
+<p>by retaining discrete samples in a narrow scalar band around it.</p>
+<p>The quality of the approximation depends on the spatial resolution of the underlying sampling grid and the selected threshold.</p>
+<hr>
+<hr>
+<p>See <code>engine/samplers.ts</code> for the implementation.</p>
+<h2 id="helper-function-sphericaltovector" class="tsd-anchor-link">Helper Function: SphericalToVector()<a href="#helper-function-sphericaltovector" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>HoloField implements the standard mathematical spherical coordinate convention where the Z axis is the polar axis.</p>
+<p>Some 3D graphics implementations use the Y axis as the polar axis because Y is commonly treated as the &quot;up&quot; direction. This is only a difference in coordinate orientation; both approaches describe the same sphere. We keep the Z axis convention to align with the mathematical definition of spherical coordinates.</p>
+<p>The spherical coordinate system is defined as:</p>
+<ul>
+<li>
+<p><strong>θ (theta)</strong>: polar angle (colatitude)</p>
+<ul>
+<li>measured downward from the positive Z axis</li>
+<li>range: <code>0 ≤ θ ≤ π</code></li>
+</ul>
+</li>
+<li>
+<p><strong>φ (phi)</strong>: azimuth</p>
+<ul>
+<li>angle around the Z axis in the XY plane</li>
+<li>range: <code>0 ≤ φ &lt; 2π</code></li>
+</ul>
+</li>
+</ul>
+<p>The conversion to Cartesian coordinates is performed as:</p>
+<blockquote>
+<p>x = r . sin(θ) . cos(ϕ)</p>
+</blockquote>
+<blockquote>
+<p>y = r . sin(θ) . sin(ϕ)</p>
+</blockquote>
+<blockquote>
+<p>z = r . cos(θ)</p>
+</blockquote>
+<p>So for a unit sphere, ie, radius = 1, the resulting vector has length 1. Therefore the JavaScript implementation becomes:</p>
+<pre><code><span class="hl-2">x</span><span class="hl-1"> = </span><span class="hl-2">Math</span><span class="hl-1">.</span><span class="hl-3">sin</span><span class="hl-1">(</span><span class="hl-2">theta</span><span class="hl-1">) * </span><span class="hl-2">Math</span><span class="hl-1">.</span><span class="hl-3">cos</span><span class="hl-1">(</span><span class="hl-2">phi</span><span class="hl-1">)</span><br/><span class="hl-2">y</span><span class="hl-1"> = </span><span class="hl-2">Math</span><span class="hl-1">.</span><span class="hl-3">sin</span><span class="hl-1">(</span><span class="hl-2">theta</span><span class="hl-1">) * </span><span class="hl-2">Math</span><span class="hl-1">.</span><span class="hl-3">sin</span><span class="hl-1">(</span><span class="hl-2">phi</span><span class="hl-1">)</span><br/><span class="hl-2">z</span><span class="hl-1"> = </span><span class="hl-2">Math</span><span class="hl-1">.</span><span class="hl-3">cos</span><span class="hl-1">(</span><span class="hl-2">theta</span><span class="hl-1">)</span>
+</code><button>Copy</button></pre>
+
+<h2 id="helper-function-gridposition" class="tsd-anchor-link">Helper Function: GridPosition()<a href="#helper-function-gridposition" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p><code>GridPosition</code> converts discrete grid coordinates <code>(x, y, z)</code> into the corresponding spatial position within a cubic sampling volume.</p>
+<p>The grid is centred on the origin, with <code>size</code> defining the total extent of the volume and <code>step</code> defining the distance between adjacent samples. The <code>+0.5</code> offset places each sample at the <strong>centre of its grid cell</strong> rather than on its boundary.</p>
+<p>For a grid coordinate <code>(x, y, z)</code>:</p>
+<pre><code class="text">position = -size/2 + (index + 0.5) × step
+</code><button type="button">Copy</button></pre>
+
+<p>This provides a consistent mapping between the integer indices used by the samplers and the continuous coordinates supplied to the decoder.</p>
+</div></div>
+<div class="col-sidebar">
+<div class="page-menu">
+<div class="tsd-navigation settings">
+<details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>Settings</h3></summary>
+<div class="tsd-accordion-details">
+<div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span>
+<ul id="tsd-filter-options">
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div>
+<div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div>
+<details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>On This Page</h3></summary>
+<div class="tsd-accordion-details"><a href="#samplers"><span>Samplers</span></a>
+<ul>
+<li><a href="#latitude-longitude-boundary-sampler"><span>Latitude-<wbr/>Longitude (<wbr/>Boundary <wbr/>Sampler)</span></a></li>
+<li>
+<ul>
+<li><a href="#mathematical-model"><span>Mathematical model</span></a></li></ul></li>
+<li><a href="#fibonacci-boundary-sampler"><span>Fibonacci (<wbr/>Boundary <wbr/>Sampler)</span></a></li>
+<li>
+<ul>
+<li><a href="#mathematical-model-1"><span>Mathematical model</span></a></li></ul></li>
+<li><a href="#uniform-voxel-sampler"><span>Uniform <wbr/>Voxel <wbr/>Sampler</span></a></li>
+<li>
+<ul>
+<li><a href="#mathematical-model-2"><span>Mathematical model</span></a></li></ul></li>
+<li><a href="#uniform-point-cloud-sampler"><span>Uniform <wbr/>Point <wbr/>Cloud <wbr/>Sampler</span></a></li>
+<li>
+<ul>
+<li><a href="#mathematical-model-3"><span>Mathematical model</span></a></li></ul></li>
+<li><a href="#surface-point-cloud-sampler"><span>Surface <wbr/>Point <wbr/>Cloud <wbr/>Sampler</span></a></li>
+<li>
+<ul>
+<li><a href="#mathematical-model-4"><span>Mathematical model</span></a></li></ul></li>
+<li><a href="#helper-function-sphericaltovector"><span>Helper <wbr/>Function: <wbr/>Spherical<wbr/>To<wbr/>Vector()</span></a></li>
+<li><a href="#helper-function-gridposition"><span>Helper <wbr/>Function: <wbr/>Grid<wbr/>Position()</span></a></li></ul></div></details></div>
+<div class="site-menu">
+<nav class="tsd-navigation"><a href="../index.html">HoloField - Boundary-to-Volume Generator</a>
+<ul class="tsd-small-nested-navigation" id="tsd-nav-container">
+<li>Loading...</li></ul></nav></div></div></div><footer>
+<p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>
+<div class="overlay"></div></body></html>

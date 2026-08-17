@@ -1,0 +1,79 @@
+openapi: 3.0.0
+
+info:
+  title: HoloField - Boundary-to-Volume Generator API
+  version: 0.1.0
+  description: >
+    HTTP interface for evaluating scalar fields and generating geometry data.
+
+servers:
+  - url: /api
+    description: API base path
+
+tags:
+  - name: Boundary Fields
+    description: Boundary field evaluations at specified coordinates.
+    externalDocs:
+      description: Boundary field documentation
+      url: /docs/modules/Boundary_Fields.html
+
+  - name: Decoders
+    description: Decoder evaluations that transform boundary fields into scalar fields at specified coordinates.
+    externalDocs:
+      description: Decoder documentation
+      url: /docs/modules/Decoders.html
+
+components:
+
+  parameters:
+
+    BoundaryField:
+      $ref: './parameters/boundary_field.yaml'
+
+    XCoordinate:
+      $ref: './parameters/cartesian_coords.yaml#/XCoordinate'
+    
+    YCoordinate:
+      $ref: './parameters/cartesian_coords.yaml#/YCoordinate'
+
+    ZCoordinate:
+      $ref: './parameters/cartesian_coords.yaml#/ZCoordinate'
+
+  schemas:
+
+    APIError:
+      $ref: './schemas/api_error.yaml'
+
+  responses:
+
+    BadRequest:
+      $ref: './responses/bad_request.yaml'
+
+    NotFound:
+      $ref: './responses/not_found.yaml'
+
+    InternalServerError:
+      $ref: './responses/internal_server_error.yaml'
+
+paths:
+
+  /decoders/height:
+    $ref: './paths/decoder_height.yaml'
+
+  /decoders/radial:
+    $ref: './paths/decoder_radial.yaml'
+
+  /fields/fruity:
+    $ref: './paths/field_fruity.yaml'
+
+  /fields/height:
+    $ref: './paths/field_height.yaml'
+
+  /fields/polarh:
+    $ref: './paths/field_polarh.yaml'
+
+  /fields/hemisphere:
+    $ref: './paths/field_hemisphere.yaml'
+
+  /fields/lat-bands:
+    $ref: './paths/field_latitude.yaml'

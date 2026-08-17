@@ -1,0 +1,36 @@
+get:
+  operationId: RadialDecoder
+  tags:
+    - Decoders
+  summary: Evaluate the radial scalar field
+  description: >
+    Returns a signed scalar field value.
+    Positive values indicate points inside the implicit surface.
+    Negative values indicate points outside.
+
+  parameters:
+
+    - $ref: '../openapi.yaml#/components/parameters/BoundaryField'
+    - $ref: '../openapi.yaml#/components/parameters/XCoordinate'
+    - $ref: '../openapi.yaml#/components/parameters/YCoordinate'
+    - $ref: '../openapi.yaml#/components/parameters/ZCoordinate'
+
+  responses:
+    "200":
+      description: Scalar field value
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - value
+            properties:
+              value:
+                type: number
+                description: Signed scalar field value. Positive inside the surface, negative outside.
+
+    "400":
+      $ref: '../openapi.yaml#/components/responses/BadRequest'
+
+    "500":
+      $ref: '../openapi.yaml#/components/responses/InternalServerError'

@@ -1,0 +1,146 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>HoloField</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>HoloField</h1>
+        <div id="header-subtitle">
+
+            <p>Boundary-to-Volume Generator</p>
+
+            <nav id="header-menu">
+                <button id="about-button">About</button>
+                <button id="how-to-button">How To</button>
+                <button id="docs-button">Docs</button>
+            </nav>
+
+        </div>
+        
+    </header>
+
+    <main id="app-layout">
+
+        <aside id="pipeline-panel">
+
+            <h2>Pipeline</h2>
+
+            <label>
+                Boundary field
+                <select id="boundary-select"></select>
+                <small id="boundary-description"></small>
+            </label>
+
+            <label>
+                Decoder
+                <select id="decoder-select"></select>
+                <small id="decoder-description"></small>
+            </label>
+            
+            <label>
+                Sampler
+                <select id="sampler-select"></select>
+                <small id="sampler-description"></small>
+            </label>
+
+            <label>
+                Mesh Generator
+                <select id="generator-select"></select>
+                <small id="generator-description"></small>
+            </label>
+
+            <button id="render-button" disabled>
+                Render
+            </button>
+
+            <pre id="dataset-metadata"></pre>
+
+        </aside>
+
+        <section id="workspace">
+
+            <div id="docs-workspace" class="page hidden">
+
+                <iframe src="/docs/documents/Engine_Guide.html"></iframe>
+
+            </div>
+
+            <div id="render-workspace" class="page">
+
+                <section id="render-list-panel">
+
+                    <div id="about-page" class="page hidden">
+
+                        <iframe src="about.html"></iframe>
+
+                    </div>
+
+                    <div id="howto-page" class="page hidden">
+
+                        <iframe src="howto.html"></iframe>
+
+                    </div>
+
+                    <div id="render-list-page" class="page">
+
+                        <h2>Session renders</h2>
+
+                        <div id="render-list-layout" class="workspace-columns">
+
+                            <select id="boundary-render-list" class="render-list" size="8"></select>
+
+                            <select id="projection-render-list" class="render-list" size="8"></select>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+                <section id="view-panel">
+
+                    <label>
+                        <input id="autorotate" type="checkbox" checked>
+                        Auto rotate
+                    </label>
+
+                    <div id="viewer-layout" class="workspace-columns">
+
+                        <fieldset class="viewer-frame">
+
+                            <legend>Boundary View</legend>
+
+                            <div id="boundary-viewer"></div>
+
+                        </fieldset>
+
+                        <fieldset class="viewer-frame">
+
+                            <legend>Projection View</legend>
+
+                            <div id="projection-viewer"></div>
+
+                        </fieldset>
+
+                    </div>
+
+                </section>
+            
+            </div>
+
+        </section>
+
+    </main>
+
+    <script type="module" src="/viewer.js"></script>
+
+</body>
+
+</html>

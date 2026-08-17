@@ -1,0 +1,33 @@
+#APIError:
+  type: object
+  description: Standard API error response.
+
+  required:
+    - error
+
+  properties:
+    error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum: 
+            - MISSING_PARAMETERS
+            - INVALID_PARAMETERS
+            - INTERNAL_SERVER_ERROR
+            - PATH_NOT_FOUND
+        message:
+          type: string
+        documentation:
+          type: string
+          format: uri
+          description: Link to API documentation relevant to the error.
+
+  example:
+    error:
+      code: INVALID_PARAMETERS
+      message: x, y and z must be finite numbers.
+      documentation: http://localhost:3000/api/docs/#/Engine/HeightFieldDecoder

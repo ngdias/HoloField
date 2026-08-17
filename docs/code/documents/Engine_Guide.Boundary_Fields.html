@@ -1,0 +1,344 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>Boundary Fields | HoloField - Boundary-to-Volume Generator</title><meta name="description" content="Documentation for HoloField - Boundary-to-Volume Generator"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">HoloField - Boundary-to-Volume Generator</a>
+<div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
+<ul role="listbox" id="tsd-search-results"></ul>
+<div id="tsd-search-status" aria-live="polite" aria-atomic="true">
+<div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-menu"></use></svg></a></div></header>
+<div class="container container-main">
+<div class="col-content">
+<div class="tsd-page-title">
+<ul class="tsd-breadcrumb" aria-label="Breadcrumb">
+<li><a href="Engine_Guide.html">Engine Guide</a></li>
+<li><a href="" aria-current="page">Boundary Fields</a></li></ul></div>
+<div class="tsd-panel tsd-typography"><h1 id="boundary-fields" class="tsd-anchor-link">Boundary Fields<a href="#boundary-fields" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h1>
+<p>A Boundary Field defines a scalar function, to be applied over a geometric (surface) domain.</p>
+<p>The purpose of separating fields from geometry generation is to allow the same mathematical function to be sampled using different surface representations.</p>
+<p>In other words, Boundary Fields are independent of the underlying surface geometry. A sampler determines how positions on a surface are represented and provides the coordinates used by the field.</p>
+<p>A field does not create geometry. It only answers:</p>
+<blockquote>
+<p>Given a coordinate in the field domain, what scalar value exists there?</p>
+</blockquote>
+<h2 id="architecture" class="tsd-anchor-link">Architecture<a href="#architecture" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>The pipeline for generating a <em>boundary representation on the surface of a sphere</em> consists of:</p>
+<blockquote>
+<p>Sampler → Boundary Field → Geometry</p>
+</blockquote>
+<p>The pipeline for generating a <em>boundary projection into a 3D volume</em> consists of:</p>
+<blockquote>
+<p>Sampler → Boundary Field → Decoder → Geometry</p>
+</blockquote>
+<p>or</p>
+<blockquote>
+<p>Sampler → Boundary Field → Decoder → Mesh Generator → Geometry</p>
+</blockquote>
+<p>The sampler is responsible for converting a geometric representation into the coordinate system expected by the field.</p>
+<p>Examples:</p>
+<ul>
+<li>A sphere sampler may provide normalized direction vectors.</li>
+<li>A planar sampler may provide normalized planar coordinates.</li>
+<li>A voxel sampler may provide coordinates within a volume.</li>
+</ul>
+<p>The Boundary Field remains independent of how the coordinates were generated.</p>
+<h2 id="coordinate-assumptions" class="tsd-anchor-link">Coordinate assumptions<a href="#coordinate-assumptions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>Fields <em>operate</em> in a normalized coordinate space:</p>
+<blockquote>
+<p>x, y, z ∈ [-1, 1]</p>
+</blockquote>
+<p>The decoder establishes the coordinate representation presented to the field, not the sampler. The sampler is responsible only for generating and supplying spatial coordinates within its configured sampling domain; the decoder determines how those coordinates are interpreted and transformed before being passed to the underlying mathematical representation.</p>
+<p>The normalized coordinate convention describes the intended <em>input</em> domain of the field; it is not necessarily enforced by the field's mathematical function.</p>
+<p>Fields should not perform geometry-specific transformations.</p>
+<h1 id="implemented-fields" class="tsd-anchor-link">Implemented Fields<a href="#implemented-fields" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h1>
+<h2 id="fruity-field" class="tsd-anchor-link">Fruity Field<a href="#fruity-field" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>See <a href="../variables/Boundary_Fields.FruityField.html" class="tsd-kind-variable">FruityField</a> for the implementation.</p>
+<p>The Fruity Field provides a simple placeholder for experimenting with arbitrary mathematical functions without modifying the existing boundary-field definitions.</p>
+<p>It is useful for:</p>
+<ul>
+<li>quickly testing a new mathematical expression,</li>
+<li>experimenting with field behaviour before creating a dedicated field,</li>
+<li>testing decoders and samplers with different input patterns,</li>
+<li>exploring how mathematical changes propagate through the generation pipeline.</li>
+</ul>
+<p>The field is intentionally minimal: its purpose is to provide a convenient entry point for experimentation rather than to represent a specific mathematical shape or pattern.</p>
+<h3 id="mathematical-definition" class="tsd-anchor-link">Mathematical definition<a href="#mathematical-definition" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>The field evaluates a user-defined function of the sampled coordinates:</p>
+<blockquote>
+<p>value = f(x, y, z)</p>
+</blockquote>
+<p>The function may use any combination of the available spatial coordinates and mathematical operations supported by the implementation.</p>
+<h3 id="domain-assumptions" class="tsd-anchor-link">Domain assumptions<a href="#domain-assumptions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>The field itself imposes no particular geometric interpretation on the coordinates. The expected coordinate range and meaning depend on the sampler and on the mathematical function being tested.</p>
+<p>The resulting values are passed through the same decoder and sampling pipeline as other boundary fields.</p>
+<h3 id="examples" class="tsd-anchor-link">Examples<a href="#examples" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>A simple expression can be substituted directly into the implementation:</p>
+<pre><code class="ts"><span class="hl-0">return</span><span class="hl-1"> </span><span class="hl-2">Math</span><span class="hl-1">.</span><span class="hl-3">sin</span><span class="hl-1">(</span><span class="hl-2">coordinate</span><span class="hl-1">.</span><span class="hl-2">x</span><span class="hl-1">) + </span><span class="hl-2">Math</span><span class="hl-1">.</span><span class="hl-3">cos</span><span class="hl-1">(</span><span class="hl-2">coordinate</span><span class="hl-1">.</span><span class="hl-2">y</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+<p>or:</p>
+<pre><code class="ts"><span class="hl-0">return</span><span class="hl-1"> </span><span class="hl-2">coordinate</span><span class="hl-1">.</span><span class="hl-2">x</span><span class="hl-1"> * </span><span class="hl-2">coordinate</span><span class="hl-1">.</span><span class="hl-2">y</span><span class="hl-1"> - </span><span class="hl-2">coordinate</span><span class="hl-1">.</span><span class="hl-2">z</span><span class="hl-1">;</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Changing the expression changes the boundary representation without needing to touch any of the other fields.</p>
+<h2 id="hemispherical-field" class="tsd-anchor-link">Hemispherical Field<a href="#hemispherical-field" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>See <a href="../variables/Boundary_Fields.HemisphereField.html" class="tsd-kind-variable">HemisphereField</a> for the implementation.</p>
+<p>The Hemispherical Field divides the coordinate domain into two regions according to the sign of the Z coordinate, assigning one value to the upper hemisphere and another to the lower hemisphere.</p>
+<p>It is useful for:</p>
+<ul>
+<li>testing binary or discontinuous boundary fields,</li>
+<li>distinguishing the two halves of a spherical domain,</li>
+<li>validating Z-axis orientation and coordinate normalization,</li>
+<li>testing how decoders and samplers handle abrupt changes in field values.</li>
+</ul>
+<p>It is a useful diagnostic field because its output is determined entirely by the sign of <code>z</code>. The resulting boundary between the two regions should occur at the equatorial plane, making incorrect coordinate orientation or parameterization immediately apparent.</p>
+<h3 id="mathematical-definition-1" class="tsd-anchor-link">Mathematical definition<a href="#mathematical-definition-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>The field evaluates:</p>
+<blockquote>
+<p>value = 1 if z &gt; 0, otherwise 0</p>
+</blockquote>
+<p>Input and output mapping:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Input z</th>
+<th style="text-align:center">Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">z &lt; 0</td>
+<td style="text-align:center">0</td>
+</tr>
+<tr>
+<td style="text-align:center">z = 0</td>
+<td style="text-align:center">0</td>
+</tr>
+<tr>
+<td style="text-align:center">z &gt; 0</td>
+<td style="text-align:center">1</td>
+</tr>
+</tbody>
+</table>
+<p>The field therefore contains a discontinuity at <code>z = 0</code>, except that the implementation explicitly assigns the boundary itself the value <code>0</code>.</p>
+<h3 id="domain-assumptions-1" class="tsd-anchor-link">Domain assumptions<a href="#domain-assumptions-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>The field only depends on the sign of the Z coordinate and does not require a normalized range.</p>
+<p>For a spherical surface, the sign of <code>z</code> separates the sphere into two hemispheres:</p>
+<ul>
+<li><code>z &gt; 0</code> — upper hemisphere</li>
+<li><code>z ≤ 0</code> — lower hemisphere, including the equator</li>
+</ul>
+<p>The coordinate system must therefore have a meaningful Z axis corresponding to the intended vertical direction.</p>
+<h3 id="examples-1" class="tsd-anchor-link">Examples<a href="#examples-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>A sphere:</p>
+<pre><code class="text">south pole z=-1 → 0
+equator   z= 0 → 0
+north pole z= 1 → 1
+</code><button type="button">Copy</button></pre>
+
+<p>A planar domain:</p>
+<pre><code class="text">lower region z&lt;0 → 0
+boundary   z= 0 → 0
+upper region z&gt;0 → 1
+</code><button type="button">Copy</button></pre>
+
+<h2 id="latitude-bands-field" class="tsd-anchor-link">Latitude Bands Field<a href="#latitude-bands-field" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>See <a href="../variables/Boundary_Fields.LatitudeBandsField.html" class="tsd-kind-variable">LatitudeBandsField</a> for the implementation.</p>
+<p>The Latitude Bands Field produces a repeating sinusoidal pattern based on latitude over a spherical surface.</p>
+<p>It is useful for:</p>
+<ul>
+<li>generating repeated bands across a spherical boundary,</li>
+<li>testing angular parameterization,</li>
+<li>validating the relationship between Cartesian coordinates and spherical coordinates,</li>
+<li>producing a visually distinctive pattern for detecting spatial distortions or orientation errors.</li>
+</ul>
+<p>Unlike the <a href="#hemispherical-field">Hemispherical Field</a>, which divides the sphere into two regions, this field produces multiple alternating bands whose values vary continuously between <code>0</code> and <code>1</code>.</p>
+<h3 id="mathematical-definition-2" class="tsd-anchor-link">Mathematical definition<a href="#mathematical-definition-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>The field evaluates:</p>
+<blockquote>
+<p>value = 0.5 + 0.5 sin(8 arccos(z))</p>
+</blockquote>
+<p>The <code>arccos(z)</code> term converts the normalized Z coordinate into the polar angle measured from the positive Z axis.</p>
+<p>The resulting sine function completes four full oscillations over the polar-angle range from <code>0</code> to <code>π</code>, producing alternating latitude bands.</p>
+<p>The output is shifted and scaled so that:</p>
+<blockquote>
+<ul>
+<li><code>sin(...) = -1</code> produces <code>0</code></li>
+<li><code>sin(...) = 0</code> produces <code>0.5</code></li>
+<li><code>sin(...) = 1</code> produces <code>1</code></li>
+</ul>
+</blockquote>
+<h3 id="domain-assumptions-2" class="tsd-anchor-link">Domain assumptions<a href="#domain-assumptions-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>The field expects the input Z coordinate to represent the normalized vertical component of a spherical position:</p>
+<blockquote>
+<p>z ∈ [-1,1]</p>
+</blockquote>
+<p>For a unit sphere:</p>
+<ul>
+<li><code>z = 1</code> corresponds to the north pole,</li>
+<li><code>z = 0</code> corresponds to the equator,</li>
+<li><code>z = -1</code> corresponds to the south pole.</li>
+</ul>
+<p>Because the field depends only on <code>z</code>, every point at the same latitude receives the same value. The resulting pattern therefore forms bands around the Z axis.</p>
+<h3 id="examples-2" class="tsd-anchor-link">Examples<a href="#examples-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>On a unit sphere:</p>
+<pre><code class="text">north pole     z =  1 → 0.5
+upper latitudes       → alternating values
+equator        z =  0 → 0.5
+lower latitudes       → alternating values
+south pole     z = -1 → 0.5
+</code><button type="button">Copy</button></pre>
+
+<p>The bands are therefore concentric rings when viewed along the Z axis, and horizontal latitude bands when the sphere is viewed from the side.</p>
+<h2 id="polar-height-field" class="tsd-anchor-link">Polar Height Field<a href="#polar-height-field" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>See <a href="../variables/Boundary_Fields.PolarHeightField.html" class="tsd-kind-variable">PolarHeightField</a> for the implementation.</p>
+<p>The Height Gradient Field creates a scalar gradient based on vertical position within the coordinate domain.</p>
+<p>It is useful for generating height-dependent effects such as:</p>
+<ul>
+<li>elevation-based coloring,</li>
+<li>density transitions,</li>
+<li>displacement intensity,</li>
+<li>terrain-like gradients.</li>
+</ul>
+<p>It is useful as a first validator because:</p>
+<ul>
+<li>every sampled value is easy to predict analytically,</li>
+<li>produces linear mapping with smooth variation over the spherical surface (continuous gradient without discontinuities)</li>
+<li>the resulting color gradient immediately reveals incorrect parameterization,</li>
+<li>any inversion of the Z-axis or normalization errors are visually obvious.</li>
+</ul>
+<h3 id="mathematical-definition-3" class="tsd-anchor-link">Mathematical definition<a href="#mathematical-definition-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>The field evaluates:</p>
+<blockquote>
+<p>value = (z + 1) / 2</p>
+</blockquote>
+<p>Input and output mapping:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Input z</th>
+<th style="text-align:center">Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">-1</td>
+<td style="text-align:center">0</td>
+</tr>
+<tr>
+<td style="text-align:center">0</td>
+<td style="text-align:center">0.5</td>
+</tr>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="domain-assumptions-3" class="tsd-anchor-link">Domain assumptions<a href="#domain-assumptions-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>The field expects the input coordinate system to have a normalized Z axis:</p>
+<blockquote>
+<p>z ∈ [-1,1]</p>
+</blockquote>
+<p>For spherical surfaces this corresponds naturally to the vertical component of
+a unit direction vector.</p>
+<p>For other surfaces, the sampler must provide an equivalent normalized
+coordinate representation.</p>
+<h3 id="examples-3" class="tsd-anchor-link">Examples<a href="#examples-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>A sphere sampler:</p>
+<pre><code class="text">south pole z=-1 → 0
+equator z= 0 → 0.5
+north pole z= 1 → 1
+</code><button type="button">Copy</button></pre>
+
+<p>A planar sampler:</p>
+<pre><code class="text">bottom edge z=-1 → 0
+center z= 0 → 0.5
+top edge z= 1 → 1
+</code><button type="button">Copy</button></pre>
+
+<h2 id="simple-height-field" class="tsd-anchor-link">Simple Height Field<a href="#simple-height-field" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>See <a href="../variables/Boundary_Fields.SimpleHeightField.html" class="tsd-kind-variable">SimpleHeightField</a> for the implementation.</p>
+<p>The Simple Height Field produces a smoothly varying height value from the X and Y coordinates using a combination of sine and cosine functions.</p>
+<p>It is useful for:</p>
+<ul>
+<li>testing height-based decoders - essentially <strong>terrain geometries</strong>,</li>
+<li>producing a simple non-planar surface,</li>
+<li>validating how variations in a boundary field propagate into a 3D projection,</li>
+<li>providing a more structured test case than a uniform height field.</li>
+</ul>
+<p>The periodic variation creates a regular pattern of peaks and valleys while keeping the overall height within a narrow range.</p>
+<h3 id="mathematical-definition-4" class="tsd-anchor-link">Mathematical definition<a href="#mathematical-definition-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>The field evaluates:</p>
+<blockquote>
+<p>value = 0.65 + 0.1 sin(10x) cos(10y)</p>
+</blockquote>
+<p>The resulting value oscillates around a baseline of <code>0.65</code> with an amplitude of <code>0.1</code>.</p>
+<p>The theoretical output range is therefore:</p>
+<blockquote>
+<p>0.55 ≤ value ≤ 0.75</p>
+</blockquote>
+<h3 id="domain-assumptions-4" class="tsd-anchor-link">Domain assumptions<a href="#domain-assumptions-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>The field depends only on the X and Y coordinates. The Z coordinate has no effect on the result.</p>
+<p>The spatial frequency is controlled by the factor <code>10</code> applied to both X and Y. Consequently, the field produces a repeating two-dimensional pattern across the XY plane.</p>
+<p>The output is intended to represent a height value rather than a signed distance or occupancy value. A decoder is responsible for interpreting this height as a three-dimensional surface.</p>
+<h3 id="examples-4" class="tsd-anchor-link">Examples<a href="#examples-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>At positions where the sine and cosine terms produce their maximum or minimum combinations:</p>
+<pre><code class="text">maximum → 0.75
+baseline → 0.65
+minimum → 0.55
+</code><button type="button">Copy</button></pre>
+
+<p>The resulting surface forms a regular pattern of shallow undulations across the XY plane.</p>
+</div></div>
+<div class="col-sidebar">
+<div class="page-menu">
+<div class="tsd-navigation settings">
+<details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>Settings</h3></summary>
+<div class="tsd-accordion-details">
+<div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span>
+<ul id="tsd-filter-options">
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div>
+<div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div>
+<details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>On This Page</h3></summary>
+<div class="tsd-accordion-details"><a href="#boundary-fields"><span>Boundary <wbr/>Fields</span></a>
+<ul>
+<li><a href="#architecture"><span>Architecture</span></a></li>
+<li><a href="#coordinate-assumptions"><span>Coordinate assumptions</span></a></li></ul><a href="#implemented-fields"><span>Implemented <wbr/>Fields</span></a>
+<ul>
+<li><a href="#fruity-field"><span>Fruity <wbr/>Field</span></a></li>
+<li>
+<ul>
+<li><a href="#mathematical-definition"><span>Mathematical definition</span></a></li>
+<li><a href="#domain-assumptions"><span>Domain assumptions</span></a></li>
+<li><a href="#examples"><span>Examples</span></a></li></ul></li>
+<li><a href="#hemispherical-field"><span>Hemispherical <wbr/>Field</span></a></li>
+<li>
+<ul>
+<li><a href="#mathematical-definition-1"><span>Mathematical definition</span></a></li>
+<li><a href="#domain-assumptions-1"><span>Domain assumptions</span></a></li>
+<li><a href="#examples-1"><span>Examples</span></a></li></ul></li>
+<li><a href="#latitude-bands-field"><span>Latitude <wbr/>Bands <wbr/>Field</span></a></li>
+<li>
+<ul>
+<li><a href="#mathematical-definition-2"><span>Mathematical definition</span></a></li>
+<li><a href="#domain-assumptions-2"><span>Domain assumptions</span></a></li>
+<li><a href="#examples-2"><span>Examples</span></a></li></ul></li>
+<li><a href="#polar-height-field"><span>Polar <wbr/>Height <wbr/>Field</span></a></li>
+<li>
+<ul>
+<li><a href="#mathematical-definition-3"><span>Mathematical definition</span></a></li>
+<li><a href="#domain-assumptions-3"><span>Domain assumptions</span></a></li>
+<li><a href="#examples-3"><span>Examples</span></a></li></ul></li>
+<li><a href="#simple-height-field"><span>Simple <wbr/>Height <wbr/>Field</span></a></li>
+<li>
+<ul>
+<li><a href="#mathematical-definition-4"><span>Mathematical definition</span></a></li>
+<li><a href="#domain-assumptions-4"><span>Domain assumptions</span></a></li>
+<li><a href="#examples-4"><span>Examples</span></a></li></ul></li></ul></div></details></div>
+<div class="site-menu">
+<nav class="tsd-navigation"><a href="../index.html">HoloField - Boundary-to-Volume Generator</a>
+<ul class="tsd-small-nested-navigation" id="tsd-nav-container">
+<li>Loading...</li></ul></nav></div></div></div><footer>
+<p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>
+<div class="overlay"></div></body></html>

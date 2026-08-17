@@ -1,0 +1,80 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>viewer.js | HoloField - Boundary-to-Volume Generator</title><meta name="description" content="Documentation for HoloField - Boundary-to-Volume Generator"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">HoloField - Boundary-to-Volume Generator</a>
+<div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
+<ul role="listbox" id="tsd-search-results"></ul>
+<div id="tsd-search-status" aria-live="polite" aria-atomic="true">
+<div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-menu"></use></svg></a></div></header>
+<div class="container container-main">
+<div class="col-content">
+<div class="tsd-page-title">
+<ul class="tsd-breadcrumb" aria-label="Breadcrumb">
+<li><a href="Web_Implementation.html">Web Implementation</a></li>
+<li><a href="" aria-current="page">viewer.js</a></li></ul></div>
+<div class="tsd-panel tsd-typography"><h1 id="viewerjs-implementation-notes" class="tsd-anchor-link">viewer.js Implementation Notes<a href="#viewerjs-implementation-notes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h1>
+<h2 id="requestanimationframe" class="tsd-anchor-link">requestAnimationFrame()<a href="#requestanimationframe" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p><code>requestAnimationFrame()</code>, like <code>document</code>, <code>window</code>, <code>console</code>, or <code>setTimeout</code>, is part of the Web API provided by browsers. It doesn't need to be imported or declared.</p>
+<p>These two are equivalent:</p>
+<p><code>requestAnimationFrame(animate);</code></p>
+<p><code>window.requestAnimationFrame(animate);</code></p>
+<p>It does not immediately call animate(). Instead, the expected browser behaviour is:</p>
+<p>&quot;Call this function just before the next screen refresh.&quot;</p>
+<p>Then it immediately returns.</p>
+<p>Only later — typically about 16 ms later on a 60 Hz display — does the browser invoke <code>animate()</code> again.</p>
+<p>So in a sense it works as asynchronous scheduling.</p>
+<h2 id="now-automatic-timestamp" class="tsd-anchor-link">(now) automatic timestamp<a href="#now-automatic-timestamp" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>This is part of JavaScript API.</p>
+<p>When the browser executes the callback, it supplies one argument. Internally it's roughly equivalent to</p>
+<p><code>animate(performance.now());</code></p>
+<p>The user never sees that call. The browser performs it.</p>
+<p><code>now</code> is a high-resolution timestamp in milliseconds. <code>now</code> has no special meaning whatsoever. It's just the parameter name you chose. These are all equivalent:</p>
+<pre><code><span class="hl-7">function</span><span class="hl-1"> </span><span class="hl-3">animate</span><span class="hl-1">(</span><span class="hl-2">now</span><span class="hl-1">) {</span><br/><span class="hl-1">}</span><br/><br/><span class="hl-7">function</span><span class="hl-1"> </span><span class="hl-3">animate</span><span class="hl-1">(</span><span class="hl-2">timestamp</span><span class="hl-1">) {</span><br/><span class="hl-1">}</span><br/><br/><span class="hl-7">function</span><span class="hl-1"> </span><span class="hl-3">animate</span><span class="hl-1">(</span><span class="hl-2">banana</span><span class="hl-1">) {</span><br/><span class="hl-1">}</span>
+</code><button>Copy</button></pre>
+
+<p>Given</p>
+<pre><code><span class="hl-7">function</span><span class="hl-1"> </span><span class="hl-3">animate</span><span class="hl-1">(</span><span class="hl-2">banana</span><span class="hl-1">) {</span><br/><br/><span class="hl-1">    </span><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-3">log</span><span class="hl-1">(</span><span class="hl-2">banana</span><span class="hl-1">);</span><br/><span class="hl-1">}</span>
+</code><button>Copy</button></pre>
+
+<p>the browser would still print something like</p>
+<blockquote>
+<p>15342.481</p>
+</blockquote>
+<p>because internally it is effectively doing</p>
+<p><code>animate(performance.now());</code></p>
+<p>where <code>15342.481</code> indicates the number of milliseconds since the page's time origin.</p>
+<p>The parameter's name is the user's choice.</p>
+<p>The callback signature expected by requestAnimationFrame defines a timestamp.</p>
+<p>Its API contract is</p>
+<pre><code><span class="hl-3">requestAnimationFrame</span><span class="hl-1">(</span><br/><span class="hl-1">    </span><span class="hl-2">callback</span><span class="hl-1">: (</span><span class="hl-2">timestamp</span><span class="hl-1">: </span><span class="hl-8">DOMHighResTimeStamp</span><span class="hl-1">) </span><span class="hl-7">=&gt;</span><span class="hl-1"> </span><span class="hl-7">void</span><br/><span class="hl-1">)</span>
+</code><button>Copy</button></pre>
+
+<p>The browser promises:</p>
+<p>&quot;When I call your callback, I'll pass exactly one argument: a high-resolution timestamp.&quot;</p>
+<p>The name of that parameter is not fixed.</p>
+<p>This is exactly the same mechanism as</p>
+<pre><code><span class="hl-1">[</span><span class="hl-4">1</span><span class="hl-1">, </span><span class="hl-4">2</span><span class="hl-1">, </span><span class="hl-4">3</span><span class="hl-1">].</span><span class="hl-3">forEach</span><span class="hl-1">(</span><span class="hl-7">function</span><span class="hl-1">(</span><span class="hl-2">cheese</span><span class="hl-1">) {</span><br/><br/><span class="hl-1">    </span><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-3">log</span><span class="hl-1">(</span><span class="hl-2">cheese</span><span class="hl-1">);</span><br/><span class="hl-1">});</span>
+</code><button>Copy</button></pre>
+
+</div></div>
+<div class="col-sidebar">
+<div class="page-menu">
+<div class="tsd-navigation settings">
+<details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>Settings</h3></summary>
+<div class="tsd-accordion-details">
+<div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span>
+<ul id="tsd-filter-options">
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div>
+<div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div>
+<details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>On This Page</h3></summary>
+<div class="tsd-accordion-details"><a href="#viewerjs-implementation-notes"><span>viewer.js <wbr/>Implementation <wbr/>Notes</span></a>
+<ul>
+<li><a href="#requestanimationframe"><span>request<wbr/>Animation<wbr/>Frame()</span></a></li>
+<li><a href="#now-automatic-timestamp"><span>(now) automatic timestamp</span></a></li></ul></div></details></div>
+<div class="site-menu">
+<nav class="tsd-navigation"><a href="../index.html">HoloField - Boundary-to-Volume Generator</a>
+<ul class="tsd-small-nested-navigation" id="tsd-nav-container">
+<li>Loading...</li></ul></nav></div></div></div><footer>
+<p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>
+<div class="overlay"></div></body></html>

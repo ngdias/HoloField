@@ -1,0 +1,105 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>Mesh Generators | HoloField - Boundary-to-Volume Generator</title><meta name="description" content="Documentation for HoloField - Boundary-to-Volume Generator"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">HoloField - Boundary-to-Volume Generator</a>
+<div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
+<ul role="listbox" id="tsd-search-results"></ul>
+<div id="tsd-search-status" aria-live="polite" aria-atomic="true">
+<div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-menu"></use></svg></a></div></header>
+<div class="container container-main">
+<div class="col-content">
+<div class="tsd-page-title">
+<ul class="tsd-breadcrumb" aria-label="Breadcrumb">
+<li><a href="Engine_Guide.html">Engine Guide</a></li>
+<li><a href="" aria-current="page">Mesh Generators</a></li></ul></div>
+<div class="tsd-panel tsd-typography"><h1 id="mesh-generators" class="tsd-anchor-link">Mesh Generators<a href="#mesh-generators" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h1>
+<p>A mesh generator extracts an explicit surface representation from a sampled scalar field.</p>
+<p>Mesh generators operate on a volumetric dataset produced by a volume sampler. They interpret the scalar values relative to an isolevel and determine where the corresponding implicit surface passes through the sampled volume.</p>
+<p>The resulting mesh dataset contains vertices and triangles and can be passed to the rendering side of HoloField through the appropriate adapter.</p>
+<p>Different mesh generators can operate on the same voxel dataset using different surface extraction strategies. This allows the effects of the extraction algorithm to be explored independently from the boundary field, decoder, and sampling stages.</p>
+<h2 id="marching-cubes-generator" class="tsd-anchor-link">Marching Cubes Generator<a href="#marching-cubes-generator" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>See <a href="../variables/Mesh_Generators.MarchingCubesGenerator.html" class="tsd-kind-variable">Marching Cubes</a> for the implementation.</p>
+<p>The Marching Cubes Generator extracts an isosurface by processing the voxel grid one cell at a time.</p>
+<p>For each cube of eight neighbouring scalar samples, the generator determines which corners lie below the selected isolevel. This produces one of 256 possible cube configurations. A lookup table then determines which cube edges are intersected by the isosurface and how those intersections should be connected into triangles.</p>
+<p>The resulting triangles form an approximation of the isosurface across the entire voxel grid.</p>
+<h3 id="mathematical-model" class="tsd-anchor-link">Mathematical model<a href="#mathematical-model" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>For each cube, the eight scalar values are compared with the isolevel:</p>
+<blockquote>
+<p>value &lt; isoLevel → inside
+value ≥ isoLevel → outside</p>
+</blockquote>
+<p>The resulting binary configuration identifies the cube's topology. Where an edge connects samples on opposite sides of the isolevel, the surface is assumed to intersect that edge.</p>
+<p>The intersection position is interpolated between the two edge endpoints according to their scalar values.</p>
+<p>The lookup table then specifies the triangles connecting these intersection points.</p>
+<h3 id="characteristics" class="tsd-anchor-link">Characteristics<a href="#characteristics" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>Marching Cubes is a local surface extraction method: each cube is processed using its own eight scalar values and the predefined topology table.</p>
+<p>Its main advantages are:</p>
+<ul>
+<li>straightforward implementation,</li>
+<li>predictable processing of a regular voxel grid,</li>
+<li>well-established topology cases,</li>
+<li>direct production of triangle geometry.</li>
+</ul>
+<p>The extracted surface is therefore strongly dependent on the spatial resolution of the voxel dataset. Increasing the sampling resolution provides more local information from which the surface can be reconstructed.</p>
+<h2 id="dual-contouring-generator" class="tsd-anchor-link">Dual Contouring Generator<a href="#dual-contouring-generator" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>See <a href="../variables/Mesh_Generators.DualContouringGenerator.html" class="tsd-kind-variable">Dual Contouring</a> for the implementation.</p>
+<p>The Dual Contouring Generator extracts an isosurface by constructing a representative vertex for each voxel cell containing a surface intersection.</p>
+<p>Instead of generating triangles directly from the topology of each cube, Dual Contouring first identifies where the implicit surface intersects the cube's edges and derives constraints from those intersections. These constraints are used to position a representative vertex within the cell.</p>
+<p>Neighbouring cell vertices are then connected to form the surface mesh.</p>
+<h3 id="mathematical-model-1" class="tsd-anchor-link">Mathematical model<a href="#mathematical-model-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>For each voxel cell, the generator examines the edges connecting its eight corners. An edge represents a surface intersection when its endpoint values lie on opposite sides of the selected isolevel.</p>
+<p>Each intersection provides a constraint describing where the surface passes through the cell and, when available, the local surface normal.</p>
+<p>The representative vertex is obtained by solving a <strong>Quadratic Error Function (QEF)</strong> that seeks the position best satisfying the collected surface constraints.</p>
+<p>Conceptually, the QEF minimizes the accumulated squared distance between the candidate vertex and the constraint planes:</p>
+<blockquote>
+<p>minimize Σ (nᵢ · (x - pᵢ))²</p>
+</blockquote>
+<p>where <code>pᵢ</code> is a surface intersection point and <code>nᵢ</code> is its associated normal.</p>
+<p>The resulting vertex is therefore influenced by multiple surface intersections within the same cell rather than being determined independently for each intersected edge.</p>
+<h3 id="characteristics-1" class="tsd-anchor-link">Characteristics<a href="#characteristics-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>Dual Contouring differs from Marching Cubes primarily in how it represents the surface within each cell.</p>
+<p>Marching Cubes:</p>
+<ul>
+<li>identifies edge intersections,</li>
+<li>uses predefined configurations,</li>
+<li>directly creates triangles.</li>
+</ul>
+<p>Dual Contouring:</p>
+<ul>
+<li>identifies edge intersections,</li>
+<li>derives surface constraints,</li>
+<li>creates a representative vertex per intersecting cell,</li>
+<li>connects neighbouring cell vertices to form the surface.</li>
+</ul>
+<p>Because the vertex position is determined from multiple local constraints, Dual Contouring can preserve sharper features and more directly adapt the mesh geometry to the local shape of the implicit surface.</p>
+<p>Its implementation is consequently more involved than Marching Cubes and depends on the quality of the surface intersection and normal information available from the sampled field.</p>
+</div></div>
+<div class="col-sidebar">
+<div class="page-menu">
+<div class="tsd-navigation settings">
+<details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>Settings</h3></summary>
+<div class="tsd-accordion-details">
+<div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span>
+<ul id="tsd-filter-options">
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div>
+<div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div>
+<details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>On This Page</h3></summary>
+<div class="tsd-accordion-details"><a href="#mesh-generators"><span>Mesh <wbr/>Generators</span></a>
+<ul>
+<li><a href="#marching-cubes-generator"><span>Marching <wbr/>Cubes <wbr/>Generator</span></a></li>
+<li>
+<ul>
+<li><a href="#mathematical-model"><span>Mathematical model</span></a></li>
+<li><a href="#characteristics"><span>Characteristics</span></a></li></ul></li>
+<li><a href="#dual-contouring-generator"><span>Dual <wbr/>Contouring <wbr/>Generator</span></a></li>
+<li>
+<ul>
+<li><a href="#mathematical-model-1"><span>Mathematical model</span></a></li>
+<li><a href="#characteristics-1"><span>Characteristics</span></a></li></ul></li></ul></div></details></div>
+<div class="site-menu">
+<nav class="tsd-navigation"><a href="../index.html">HoloField - Boundary-to-Volume Generator</a>
+<ul class="tsd-small-nested-navigation" id="tsd-nav-container">
+<li>Loading...</li></ul></nav></div></div></div><footer>
+<p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer>
+<div class="overlay"></div></body></html>

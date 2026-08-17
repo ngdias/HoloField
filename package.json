@@ -1,0 +1,46 @@
+{
+  "name": "HoloField",
+  "version": "0.1.0",
+  "description": "Exploring holographic-like generation of 3D geometry from 2D boundary fields",
+  "type": "module",
+  "keywords": [
+    "holographic",
+    "3d",
+    "geometry",
+    "volumetric",
+    "projection"
+  ],
+  "author": "Nuno Dias",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ngdias/HoloField.git"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig_build.json --watch",
+    "server": "node dist/server.js",
+    "docs": "typedoc",
+    "validate-openapi": "node dist/validate_openapi.js"
+  },
+  "bugs": {
+    "url": "https://github.com/ngdias/HoloField.git/issues"
+  },
+  "homepage": "https://github.com/ngdias/HoloField",
+  "dependencies": {
+    "express": "^5.2.1",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1",
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "@apidevtools/swagger-parser": "^12.1.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.0",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
+    "openapi-types": "^12.1.3",
+    "typedoc": "^0.28.20",
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,0 +1,23 @@
+XCoordinate:
+  name: x
+  in: query
+  required: true
+  description: X coordinate in Projection space.
+  schema:
+    type: number
+
+YCoordinate:
+  name: y
+  in: query
+  required: true
+  description: Y coordinate in Projection space.
+  schema:
+    type: number
+
+ZCoordinate:
+  name: z
+  in: query
+  required: true
+  description: Z coordinate in Projection space.
+  schema:
+    type: number

@@ -1,0 +1,37 @@
+get:
+  operationId: HemisphereField
+  tags:
+    - Boundary Fields
+  summary: Evaluate the Hemisphere field
+  description: >
+    Returns 1 for coordinates with a positive Z value and 0 for coordinates
+    with a non-positive Z value. This field defines a hemispherical binary
+    boundary profile.
+
+  parameters:
+    - $ref: '../openapi.yaml#/components/parameters/XCoordinate'
+    - $ref: '../openapi.yaml#/components/parameters/YCoordinate'
+    - $ref: '../openapi.yaml#/components/parameters/ZCoordinate'
+
+  responses:
+    "200":
+      description: Value returned by the field
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - value
+            properties:
+              value:
+                type: integer
+                enum:
+                  - 0
+                  - 1
+                description: Value returned by the field.
+
+    "400":
+      $ref: '../openapi.yaml#/components/responses/BadRequest'
+
+    "500":
+      $ref: '../openapi.yaml#/components/responses/InternalServerError'

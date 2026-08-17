@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>How to use HoloField</title>
+</head>
+
+<body>
+
+    <section class="document-page">
+        <h1>How to use</h1>
+
+        <p> 
+            Use the menu on the left to configure the rendering pipeline. 
+            Select the available options for each stage of the pipeline. 
+            Some options introduce constraints on the stages that follow, 
+            while others are optional. The interface will guide you as 
+            you configure the available parameters. 
+        </p> 
+        
+        <h1>Rendering pipeline</h1> 
+        
+        <p> 
+            HoloField transforms a 2D boundary representation into a 3D representation 
+            through a sequence of processing stages: 
+        </p> 
+        
+        <p>
+            <strong>Boundary field → Decoder → Sampler → Mesh Generator</strong> 
+        </p> 
+        
+        <ul> 
+            <li> 
+                <strong>Boundary fields</strong> define the mathematical representation 
+                of the surface to be projected. 
+            </li> 
+            
+            <li> 
+                <strong>Decoders</strong> transform the boundary representation into 
+                a continuous 3D scalar field. Boundary samplers can operate directly 
+                on the boundary and therefore do not require a decoder. 
+            </li> 
+            
+            <li> 
+                <strong>Samplers</strong> converts the scalar field into a discrete 
+                representation suitable for rendering. Boundary samplers produce 
+                boundary data, while the spacial samplers produce volumetric data. 
+            </li> 
+            
+            <li> 
+                <strong>Mesh Generators</strong> extract geometry from volumetric data. 
+                Mesh generators therefore require the voxel sampler. 
+            </li> 
+        
+        </ul> 
+        
+        <h1>Rendering views</h1> 
+        
+        <ul> 
+            <li> The boundary representation, describing the 2D surface of a sphere, 
+                is rendered in the left-side rendering view. 
+            </li> 
+            
+            <li> 
+                The decoded 3D projection is rendered in the right-side rendering view. 
+            </li> 
+        </ul> 
+        
+        <h1>Session renders</h1> 
+        
+        <p> The session render boxes store the renderable representations generated during 
+            the current session.
+        </p> 
+        
+        <ul> 
+            <li> 
+                Double-click an item in a render box to display its cached representation. 
+            </li> 
+            
+            <li> Select an item and press <kbd>Backspace</kbd> or <kbd>Delete</kbd> 
+                to remove it from the session. 
+            </li> 
+            
+            <li> If you render a parameter combination that has already been generated 
+                during the current session, HoloField reuses the cached representation 
+                instead of generating it again. 
+            </li> 
+            
+            <li> 
+                The corresponding options in the configuration menu are automatically 
+                selected to reflect the current projection being rendered. 
+            </li> 
+        </ul>
+
+    </section>
+
+</body>
+
+</html>

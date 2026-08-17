@@ -1,0 +1,33 @@
+get:
+  operationId: PolarHeightField
+  tags:
+    - Boundary Fields
+  summary: Evaluate the Polar Height field
+  description: >
+    Returns the normalized Z coordinate, mapping values from [-1, 1] to [0, 1].
+    This field is used to define a height-based boundary profile.
+
+  parameters:
+    - $ref: '../openapi.yaml#/components/parameters/XCoordinate'
+    - $ref: '../openapi.yaml#/components/parameters/YCoordinate'
+    - $ref: '../openapi.yaml#/components/parameters/ZCoordinate'
+
+  responses:
+    "200":
+      description: Value returned by the field
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - value
+            properties:
+              value:
+                type: number
+                description: Value returned by the field.
+
+    "400":
+      $ref: '../openapi.yaml#/components/responses/BadRequest'
+
+    "500":
+      $ref: '../openapi.yaml#/components/responses/InternalServerError'
