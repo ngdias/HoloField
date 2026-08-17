@@ -131,6 +131,7 @@ The HoloField interface will be served by the Express application and ready to u
 The Engine documentation is available [here](/docs/code/index.html). You can also browse the 'Concepts' section directly in Markdown [here](/docs/concepts/architecture.md).
 
 For the REST API, Swagger is available at http://localhost:3000/api/docs.
+
 A list of every exposed endpoint is also available at http://localhost:3000/api.
 
 The Express server runs locally on your computer and listens on `localhost`. It is intended for local use and does not expose the application to external network connections and does not access any files outside the project folder.
