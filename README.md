@@ -98,9 +98,9 @@ Future releases will extend this engineering layer further, particularly through
 
 ## How to Run
 
-HoloField can be explored directly through its **GitHub Pages** deployment without installing or running the project locally.
+HoloField can be explored **directly** through its [GitHub Pages deployment](https://ngdias.github.io/HoloField/) without installing or running the project locally.
 
-For local execution, HoloField requires:
+For **local execution**, HoloField requires:
 
 * **Node.js** — current LTS version recommended
 * **npm** — included with Node.js
@@ -126,9 +126,9 @@ Once the server is running, open a browser and navigate to:
 
 [**http://localhost:3000**](http://localhost:3000)
 
-The HoloField interface will be served by the Express application and ready to use when the page loads.
+The HoloField interface will be served by the Express web server and ready to use when the page loads.
 
-The Engine documentation is available [here](/docs/code/index.html). You can also browse the 'Concepts' section directly in Markdown [here](/docs/concepts/architecture.md).
+The Engine documentation is available [here](https://ngdias.github.io/HoloField/docs/index.html). You can also browse the 'Concepts' pages directly in Markdown [here](/docs/concepts/architecture.md).
 
 For the REST API, Swagger is available at http://localhost:3000/api/docs.
 
