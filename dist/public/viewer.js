@@ -95,15 +95,19 @@ samplerSelect.addEventListener("change", () => {
             meshGenDescription.textContent = "Mesh generators require a voxel sampler.";
             break;
         case "pointCloud":
-            decoderSelect.disabled = false;
-            decoderDescription.textContent = "";
+            if (decoderSelect.disabled) {
+                decoderSelect.disabled = false;
+                decoderDescription.textContent = "";
+            }
             meshGenSelect.disabled = true;
             meshGenSelect.selectedIndex = 0;
             meshGenDescription.textContent = "Mesh generators require a voxel sampler.";
             break;
         case "voxel":
-            decoderSelect.disabled = false;
-            decoderDescription.textContent = "";
+            if (decoderSelect.disabled) {
+                decoderSelect.disabled = false;
+                decoderDescription.textContent = "";
+            }
             meshGenSelect.disabled = false;
             meshGenDescription.textContent = "";
             break;
