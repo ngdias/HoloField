@@ -2,6 +2,8 @@
 
 HoloField is an experimental framework for transforming mathematical descriptions of two-dimensional surfaces into three-dimensional volumetric geometry.
 
+It also serves as a technical demonstration of software engineering, API deployment, integrated documentation, and the development of experimental code as a structured, consumable software system.
+
 The project establishes a pipeline in which a **2D boundary field** is transformed into a continuous **3D scalar field**, sampled into a volumetric dataset, and ultimately converted into renderable geometry. Rather than treating 3D geometry generation as a single operation, HoloField separates the process into distinct, modular stages for **projection, sampling, data representation, and surface extraction**.
 
 ![Rendering Example](./screenshot_01.png)

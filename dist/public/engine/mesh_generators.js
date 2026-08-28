@@ -42,22 +42,29 @@ export const MarchingCubesGenerator = {
     },
     processCube(runtime, x, y, z) {
         const { isoLevel, voxelDataset } = runtime;
-        const corners = GetCubeCorners(x, y, z);
-        const values = corners.map(([cx, cy, cz]) => voxelDataset.get(cx, cy, cz));
+        const step = voxelDataset.step;
+        //const corners = GetCubeCorners(x, y, z);
+        //const values: number[] = corners.map(([cx, cy, cz]) => voxelDataset.get(cx, cy, cz));
+        const values = new Array(8);
+        for (let i = 0; i < 8; i++) {
+            const [ox, oy, oz] = cubeCornerOffsets[i];
+            values[i] = voxelDataset.get(x + ox, y + oy, z + oz);
+        }
         const cubeIndex = GetCubeIndex(values, isoLevel);
         if (cubeIndex === 0 || cubeIndex === 255)
             return;
         const edgeMask = GetCubeEdgeMask(cubeIndex);
+        //const edgeMask = triTable[cubeIndex];
         //const edgeVertices = GetEdgeVertices(edgeMask, corners, isoLevel, voxelDataset.step);
         const edgeVertices = new Array(12);
         for (let edge = 0; edge < 12; edge++) {
             if (edgeMask & (1 << edge)) {
                 const [a, b] = edgeCorners[edge];
-                const vertex = InterpolateVertex(corners[a], corners[b], values[a], values[b], isoLevel);
+                const vertex = InterpolateVertex(x, y, z, a, b, values[a], values[b], isoLevel);
                 edgeVertices[edge] = [
-                    vertex[0] * voxelDataset.step,
-                    vertex[1] * voxelDataset.step,
-                    vertex[2] * voxelDataset.step
+                    vertex[0] * step,
+                    vertex[1] * step,
+                    vertex[2] * step
                 ];
             }
         }
@@ -68,7 +75,7 @@ export const MarchingCubesGenerator = {
             const c = edgeVertices[triTable[triangleOffset + i + 2]];
             if (!a || !b || !c)
                 return;
-            console.assert(triTable[triangleOffset + i] >= 0 && triTable[triangleOffset + i] < 12);
+            //console.assert(triTable[triangleOffset + i] >= 0 && triTable[triangleOffset + i] < 12);
             const triangle = [a, b, c];
             runtime.triangles.push(triangle);
         }
@@ -127,8 +134,13 @@ export const DualContouringGenerator = {
     processCube(runtime, x, y, z) {
         const { isoLevel, resolution, voxelDataset } = runtime;
         const step = voxelDataset.step;
-        const corners = GetCubeCorners(x, y, z);
-        const values = corners.map(([cx, cy, cz]) => voxelDataset.get(cx, cy, cz));
+        //const corners = GetCubeCorners(x, y, z);
+        //const values: number[] = corners.map(([cx, cy, cz]) => voxelDataset.get(cx, cy, cz));
+        const values = new Array(8);
+        for (let i = 0; i < 8; i++) {
+            const [ox, oy, oz] = cubeCornerOffsets[i];
+            values[i] = voxelDataset.get(x + ox, y + oy, z + oz);
+        }
         const cubeIndex = GetCubeIndex(values, isoLevel);
         if (cubeIndex === 0 || cubeIndex === 255)
             return;
@@ -137,7 +149,7 @@ export const DualContouringGenerator = {
         for (let edge = 0; edge < 12; edge++) {
             if (edgeMask & (1 << edge)) {
                 const [a, b] = edgeCorners[edge];
-                const position = InterpolateVertex(corners[a], corners[b], values[a], values[b], isoLevel);
+                const position = InterpolateVertex(x, y, z, a, b, values[a], values[b], isoLevel);
                 const normal = GetNormalAt(voxelDataset, position);
                 constraints.push({ position, normal });
             }
@@ -200,60 +212,63 @@ const SolveQEF = (constraints, voxelMin, voxelMax) => {
     cy /= count;
     cz /= count;
     /*
-    Build AᵀA x = Aᵀb
+    Build the normal equations:
+
+        AᵀA x = Aᵀb
 
     where:
-        A = normals
-        b = normal dot position
+        A = surface normals
+        b = normal · intersection position
 
     AᵀA is symmetric:
-        [a b c]
-        [b d e]
-        [c e f]
+
+        [ ata00  ata01  ata02 ]
+        [ ata01  ata11  ata12 ]
+        [ ata02  ata12  ata22 ]
     */
-    let a = 0;
-    let b = 0;
-    let c = 0;
-    let d = 0;
-    let e = 0;
-    let f = 0;
-    let bx = 0;
-    let by = 0;
-    let bz = 0;
+    let ata00 = 0;
+    let ata01 = 0;
+    let ata02 = 0;
+    let ata11 = 0;
+    let ata12 = 0;
+    let ata22 = 0;
+    let atbX = 0;
+    let atbY = 0;
+    let atbZ = 0;
     for (const constraint of constraints) {
         const [nx, ny, nz] = constraint.normal;
         const [px, py, pz] = constraint.position;
         const rhs = nx * px +
             ny * py +
             nz * pz;
-        a += nx * nx;
-        b += nx * ny;
-        c += nx * nz;
-        d += ny * ny;
-        e += ny * nz;
-        f += nz * nz;
-        bx += nx * rhs;
-        by += ny * rhs;
-        bz += nz * rhs;
+        ata00 += nx * nx;
+        ata01 += nx * ny;
+        ata02 += nx * nz;
+        ata11 += ny * ny;
+        ata12 += ny * nz;
+        ata22 += nz * nz;
+        atbX += nx * rhs;
+        atbY += ny * rhs;
+        atbZ += nz * rhs;
     }
-    const det = a * (d * f - e * e) -
-        b * (b * f - c * e) +
-        c * (b * e - c * d);
-    const trace = a + d + f;
+    const det = ata00 * (ata11 * ata22 - ata12 * ata12) -
+        ata01 * (ata01 * ata22 - ata02 * ata12) +
+        ata02 * (ata01 * ata12 - ata02 * ata11);
+    const trace = ata00 + ata11 + ata22;
     const conditioning = Math.abs(det) / (trace * trace * trace);
     // Regularization factor
     const alpha = trace * Math.max(1e-5, 5e-3 * (1 - conditioning));
     //const alpha = trace * Math.max(1e-6, 1e-3 * (1 - conditioning));
     //const alpha = 1e-4; 
     // Add alpha to the main diagonal of AᵀA
-    a += alpha;
-    d += alpha;
-    f += alpha;
+    ata00 += alpha;
+    ata11 += alpha;
+    ata22 += alpha;
     // Biases the system to pull towards the fallback center when under-determined
-    bx += alpha * cx;
-    by += alpha * cy;
-    bz += alpha * cz;
-    const solution = SolveSymmetric3x3(a, b, c, d, e, f, bx, by, bz);
+    atbX += alpha * cx;
+    atbY += alpha * cy;
+    atbZ += alpha * cz;
+    const solution = SolveSymmetric3x3(ata00, ata01, ata02, ata11, ata12, ata22, atbX, atbY, atbZ);
     // Degenerate system: planes do not define a unique point
     if (!solution)
         return ClampToBounds([cx, cy, cz], voxelMin, voxelMax);
@@ -268,38 +283,38 @@ const SolveQEF = (constraints, voxelMin, voxelMax) => {
     ];
     return ClampToBounds(blended, voxelMin, voxelMax);
 };
-const SolveSymmetric3x3 = (a, b, c, d, e, f, bx, by, bz) => {
-    const det = a * (d * f - e * e) -
-        b * (b * f - c * e) +
-        c * (b * e - c * d);
+const SolveSymmetric3x3 = (ata00, ata01, ata02, ata11, ata12, ata22, atbX, atbY, atbZ) => {
+    const det = ata00 * (ata11 * ata22 - ata12 * ata12) -
+        ata01 * (ata01 * ata22 - ata02 * ata12) +
+        ata02 * (ata01 * ata12 - ata02 * ata11);
     const EPSILON = 1e-12; // 12
     if (Math.abs(det) < EPSILON)
         return null;
     const invDet = 1 / det;
     /*
-    Inverse of symmetric matrix
+    Inverse of the symmetric AᵀA matrix:
 
-    1/det *
+    1 / det(AᵀA) *
 
-        [df-e², ce-bf, be-cd]
-        [ce-bf, af-c², bc-ae]
-        [be-cd, bc-ae, ad-b²]
+        [ ata11*ata22 - ata12²,  ata02*ata12 - ata01*ata22,  ata01*ata12 - ata02*ata11 ]
+        [ ata02*ata12 - ata01*ata22,  ata00*ata22 - ata02²,  ata01*ata02 - ata00*ata12 ]
+        [ ata01*ata12 - ata02*ata11,  ata01*ata02 - ata00*ata12,  ata00*ata11 - ata01² ]
     */
-    const i00 = (d * f - e * e) * invDet;
-    const i01 = (c * e - b * f) * invDet;
-    const i02 = (b * e - c * d) * invDet;
-    const i11 = (a * f - c * c) * invDet;
-    const i12 = (b * c - a * e) * invDet;
-    const i22 = (a * d - b * b) * invDet;
-    const x = i00 * bx +
-        i01 * by +
-        i02 * bz;
-    const y = i01 * bx +
-        i11 * by +
-        i12 * bz;
-    const z = i02 * bx +
-        i12 * by +
-        i22 * bz;
+    const i00 = (ata11 * ata22 - ata12 * ata12) * invDet;
+    const i01 = (ata02 * ata12 - ata01 * ata22) * invDet;
+    const i02 = (ata01 * ata12 - ata02 * ata11) * invDet;
+    const i11 = (ata00 * ata22 - ata02 * ata02) * invDet;
+    const i12 = (ata01 * ata02 - ata00 * ata12) * invDet;
+    const i22 = (ata00 * ata11 - ata01 * ata01) * invDet;
+    const x = i00 * atbX +
+        i01 * atbY +
+        i02 * atbZ;
+    const y = i01 * atbX +
+        i11 * atbY +
+        i12 * atbZ;
+    const z = i02 * atbX +
+        i12 * atbY +
+        i22 * atbZ;
     if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) {
         return null;
     }
@@ -312,25 +327,6 @@ const ClampToBounds = (point, min, max) => {
         Math.min(max[1] - padding, Math.max(min[1] + padding, point[1])),
         Math.min(max[2] - padding, Math.max(min[2] + padding, point[2]))
     ];
-};
-/**
- * Returns the eight corner coordinates of a voxel cell.
- *
- * Shared by both mesh generators and currently implemented as a reusable helper.
- * May be refactored later, for performance.
- */
-const GetCubeCorners = (x, y, z) => {
-    const corners = [
-        [x, y, z],
-        [x + 1, y, z],
-        [x + 1, y + 1, z],
-        [x, y + 1, z],
-        [x, y, z + 1],
-        [x + 1, y, z + 1],
-        [x + 1, y + 1, z + 1],
-        [x, y + 1, z + 1]
-    ];
-    return corners;
 };
 /**
  * Creates a dual-contouring vertex from surface constraints using a simple
@@ -371,17 +367,6 @@ const GetGradient = (voxelDataset, x, y, z) => {
             ? voxelDataset.get(x, y, z) - voxelDataset.get(x, y, z - 1)
             : voxelDataset.get(x, y, z + 1) - voxelDataset.get(x, y, z - 1);
     return [dx * 0.5, dy * 0.5, dz * 0.5];
-};
-const GetNormal = (voxelDataset, x, y, z) => {
-    const gradient = GetGradient(voxelDataset, x, y, z);
-    const length = Math.hypot(gradient[0], gradient[1], gradient[2]);
-    if (length === 0)
-        return [0, 0, 0];
-    return [
-        gradient[0] / length,
-        gradient[1] / length,
-        gradient[2] / length
-    ];
 };
 const Normalize = (v) => {
     const length = Math.hypot(v[0], v[1], v[2]);
@@ -467,7 +452,6 @@ const GetCubeIndex = (values, isoLevel) => {
         cubeIndex |= 64;
     if (values[7] < isoLevel)
         cubeIndex |= 128;
-    console.assert(cubeIndex >= 0 && cubeIndex <= 255);
     return cubeIndex;
 };
 /**
@@ -514,15 +498,22 @@ const GetCubeEdgeMask = (cubeIndex) => {
     }
     return edges;
 };
-/** Finds Hermite intersections. */
-const InterpolateVertex = (p1, p2, v1, v2, isoLevel) => {
-    if (Math.abs(v2 - v1) < Number.EPSILON)
-        return p1;
-    const t = (isoLevel - v1) / (v2 - v1);
+/**
+ * Finds Hermite intersections.
+ *
+ * Used by Marching Cubes and Dual Contouring.
+ */
+const InterpolateVertex = (x, y, z, cornerA, cornerB, valueA, valueB, isoLevel) => {
+    const [ax, ay, az] = cubeCornerOffsets[cornerA];
+    const [bx, by, bz] = cubeCornerOffsets[cornerB];
+    if (Math.abs(valueB - valueA) < Number.EPSILON) {
+        return [x + ax, y + ay, z + az];
+    }
+    const t = (isoLevel - valueA) / (valueB - valueA);
     return [
-        p1[0] + t * (p2[0] - p1[0]),
-        p1[1] + t * (p2[1] - p1[1]),
-        p1[2] + t * (p2[2] - p1[2])
+        x + ax + t * (bx - ax),
+        y + ay + t * (by - ay),
+        z + az + t * (bz - az)
     ];
 };
 // - ~ - ~ - ~ - ~ - ~ - ~ - ~ - ~ - ~
@@ -572,7 +563,27 @@ const axisConfigs = {
         valid: (x, y, z) => x > 0 && y > 0
     }
 };
-/** Lookup table mapping each cube edge to its two corner indices. */
+/**
+ * Defines the local coordinates of the eight corners of a unit cube.
+ * Used to access voxel values without allocating corner coordinate arrays.
+ *
+ * Used by Marching Cubes and Dual Contouring
+ */
+const cubeCornerOffsets = [
+    [0, 0, 0],
+    [1, 0, 0],
+    [1, 1, 0],
+    [0, 1, 0],
+    [0, 0, 1],
+    [1, 0, 1],
+    [1, 1, 1],
+    [0, 1, 1]
+];
+/**
+ * Lookup table mapping each cube edge to its two corner indices.
+ *
+ * Used by Marching Cubes and Dual Contouring
+*/
 const edgeCorners = [
     [0, 1], // edge 0
     [1, 2], // edge 1
